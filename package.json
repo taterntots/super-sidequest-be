@@ -1,0 +1,32 @@
+{
+  "name": "taters-tavern-be",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "server": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/taterntots/taters-tavern-be.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/taterntots/taters-tavern-be/issues"
+  },
+  "homepage": "https://github.com/taterntots/taters-tavern-be#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^9.0.2",
+    "express": "^4.17.1",
+    "helmet": "^4.6.0",
+    "knex": "^0.95.6",
+    "knex-cleaner": "^1.3.1",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.7"
+  }
+}
