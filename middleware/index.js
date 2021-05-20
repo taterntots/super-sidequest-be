@@ -1,6 +1,7 @@
 const Users = require('../models/users-model.js')
 const Games = require('../models/games-model.js')
 const Systems = require('../models/systems-model.js')
+const Difficulty = require('../models/difficulty-model.js')
 
 //*************** RESTRICTION (AUTHORIZATION) *****************//
 
@@ -193,6 +194,48 @@ function checkForSystemData(req, res, next) {
   }
 }
 
+//*************** DIFFICULTY ROUTER *****************//
+
+function validateDifficultyId(req, res, next) {
+  const { difficultyId } = req.params;
+  id = difficultyId
+
+  Difficulty.findDifficultiesBy({ id })
+    .then(difficulty => {
+      if (difficulty.length > 0) {
+        next();
+      } else {
+        res.status(404).json({
+          errorMessage: 'The difficulty with the specified ID does not exist'
+        });
+      }
+    })
+    .catch(error => {
+      res.status(500).json({
+        errorMessage:
+          'Could not validate difficulty information for the specified ID'
+      });
+    });
+}
+
+function checkForDifficultyData(req, res, next) {
+  if (Object.keys(req.body).length === 0) {
+    res.status(400).json({
+      errorMessage: 'body is empty / missing difficulty data'
+    });
+  } else if (
+    !req.body.name ||
+    !req.body.points
+  ) {
+    res.status(400).json({
+      errorMessage: 'name and points are required fields'
+    });
+  } else {
+    next();
+  }
+}
+
+
 module.exports = {
   restricted,
   validateUserId,
@@ -200,5 +243,7 @@ module.exports = {
   validateGameId,
   checkForGameData,
   validateSystemId,
-  checkForSystemData
+  checkForSystemData,
+  validateDifficultyId,
+  checkForDifficultyData
 };
