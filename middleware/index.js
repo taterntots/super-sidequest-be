@@ -38,7 +38,29 @@ function checkForUserData(req, res, next) {
       errorMessage: 'username and email are required fields'
     });
   } else {
-    next();
+    Users.findIfUserNameExists(req.body.username)
+      .then(username => {
+        Users.findIfUserEmailExists(req.body.email)
+          .then(user_email => {
+            if (username) {
+              res.status(400).json({
+                errorMessage: 'username already exists. Please pick a different username.'
+              });
+            } else if (user_email) {
+              res.status(400).json({
+                errorMessage: 'email address already exists. Please pick a different email address.'
+              });
+            } else {
+              next();
+            }
+          })
+      })
+      .catch(error => {
+        res.status(500).json({
+          errorMessage:
+            'could not check user data'
+        });
+      });
   }
 }
 

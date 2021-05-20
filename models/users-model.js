@@ -44,11 +44,41 @@ function updateUserById(userId, changes) {
     })
 }
 
+//FIND IF A USER EMAIL EXISTS IN OUR DB AND RETURN TRUE OR FALSE
+function findIfUserEmailExists(userEmail) {
+  return db('users as u')
+    .where('u.email', userEmail)
+    .first()
+    .then(user => {
+      if (user) {
+        return true
+      } else {
+        return false
+      }
+    })
+}
+
+//FIND IF A USERNAME EXISTS IN OUR DB AND RETURN TRUE OR FALSE
+function findIfUserNameExists(username) {
+  return db('users as u')
+    .where('u.username', username)
+    .first()
+    .then(user => {
+      if (user) {
+        return true
+      } else {
+        return false
+      }
+    })
+}
+
 module.exports = {
   findUsers,
   findUserById,
   findUsersBy,
   addUser,
   removeUserById,
-  updateUserById
+  updateUserById,
+  findIfUserEmailExists,
+  findIfUserNameExists
 };
