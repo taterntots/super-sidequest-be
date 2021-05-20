@@ -19,6 +19,7 @@ const usersRouter = require('../routers/users-router.js');
 const gamesRouter = require('../routers/games-router.js');
 const systemsRouter = require('../routers/systems-router.js');
 const difficultyRouter = require('../routers/difficulty-router.js');
+const challengesRouter = require('../routers/challenges-router.js');
 
 // Endpoints
 server.get('/', (req, res) => {
@@ -33,5 +34,6 @@ server.use('/api/users', restricted, usersRouter);
 server.use('/api/games', restricted, gamesRouter);
 server.use('/api/systems', restricted, systemsRouter);
 server.use('/api/difficulty', restricted, difficultyRouter);
+server.use('/api/challenges', restricted, challengesRouter);
 
 module.exports = server;

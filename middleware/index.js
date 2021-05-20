@@ -2,6 +2,7 @@ const Users = require('../models/users-model.js')
 const Games = require('../models/games-model.js')
 const Systems = require('../models/systems-model.js')
 const Difficulty = require('../models/difficulty-model.js')
+const Challenges = require('../models/challenges-model.js')
 
 //*************** RESTRICTION (AUTHORIZATION) *****************//
 
@@ -235,6 +236,50 @@ function checkForDifficultyData(req, res, next) {
   }
 }
 
+//*************** CHALLENGES ROUTER *****************//
+
+function validateChallengeId(req, res, next) {
+  const { challengeId } = req.params;
+  id = challengeId
+
+  Challenges.findChallengesBy({ id })
+    .then(challenge => {
+      if (challenge.length > 0) {
+        next();
+      } else {
+        res.status(404).json({
+          errorMessage: 'The challenge with the specified ID does not exist'
+        });
+      }
+    })
+    .catch(error => {
+      res.status(500).json({
+        errorMessage:
+          'Could not validate challenge information for the specified ID'
+      });
+    });
+}
+
+function checkForChallengeData(req, res, next) {
+  if (Object.keys(req.body).length === 0) {
+    res.status(400).json({
+      errorMessage: 'body is empty / missing challenge data'
+    });
+  } else if (
+    !req.body.name ||
+    !req.body.game_id ||
+    !req.body.user_id ||
+    !req.body.system_id ||
+    !req.body.difficulty_id ||
+    !req.body.rules
+  ) {
+    res.status(400).json({
+      errorMessage: 'name, game_id, user_id, system_id, difficulty_id, and rules are required fields'
+    });
+  } else {
+    next();
+  }
+}
 
 module.exports = {
   restricted,
@@ -245,5 +290,7 @@ module.exports = {
   validateSystemId,
   checkForSystemData,
   validateDifficultyId,
-  checkForDifficultyData
+  checkForDifficultyData,
+  validateChallengeId,
+  checkForChallengeData
 };
