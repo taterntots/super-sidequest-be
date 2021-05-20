@@ -8,9 +8,11 @@ exports.up = function (knex) {
         .defaultTo(knex.raw('uuid_generate_v4()'));
       tbl
         .text('username', 15)
+        .unique()
         .notNullable();
       tbl
         .text('email')
+        .unique()
         .notNullable();
       tbl
         .text('profile_pic_URL');

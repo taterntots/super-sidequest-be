@@ -15,7 +15,7 @@ server.use(morgan('tiny')); //logger middleware
 // const { restricted } = require('../middleware/index.js');
 
 // Router Imports
-// const usersRouter = require('../routers/users-router.js');
+const usersRouter = require('../routers/users-router.js');
 
 // Endpoints
 server.get('/', (req, res) => {
@@ -26,6 +26,6 @@ server.get('/', (req, res) => {
 });
 
 // Routes
-// server.use('/api/users', restricted, usersRouter);
+server.use('/api/users', usersRouter);
 
 module.exports = server;

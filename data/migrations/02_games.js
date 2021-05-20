@@ -8,6 +8,7 @@ exports.up = function (knex) {
         .defaultTo(knex.raw('uuid_generate_v4()'));
       tbl
         .text('name')
+        .unique()
         .notNullable();
       tbl
         .date('release_date')
