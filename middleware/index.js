@@ -1,5 +1,6 @@
 const Users = require('../models/users-model.js')
 const Games = require('../models/games-model.js')
+const Systems = require('../models/systems-model.js')
 
 //*************** RESTRICTION (AUTHORIZATION) *****************//
 
@@ -137,10 +138,67 @@ function checkForGameData(req, res, next) {
   }
 }
 
+//*************** SYSTEMS ROUTER *****************//
+
+function validateSystemId(req, res, next) {
+  const { systemId } = req.params;
+  id = systemId
+
+  Systems.findSystemsBy({ id })
+    .then(system => {
+      if (system.length > 0) {
+        next();
+      } else {
+        res.status(404).json({
+          errorMessage: 'The system with the specified ID does not exist'
+        });
+      }
+    })
+    .catch(error => {
+      res.status(500).json({
+        errorMessage:
+          'Could not validate system information for the specified ID'
+      });
+    });
+}
+
+function checkForSystemData(req, res, next) {
+  if (Object.keys(req.body).length === 0) {
+    res.status(400).json({
+      errorMessage: 'body is empty / missing system data'
+    });
+  } else if (
+    !req.body.name
+  ) {
+    res.status(400).json({
+      errorMessage: 'name is a required field'
+    });
+  } else {
+    Systems.findIfSystemExists(req.body.name)
+      .then(systemname => {
+        if (systemname) {
+          res.status(400).json({
+            errorMessage: 'system already exists. Please pick a different system.'
+          });
+        } else {
+          next();
+        }
+      })
+      .catch(error => {
+        res.status(500).json({
+          errorMessage:
+            'could not check system data'
+        });
+      });
+  }
+}
+
 module.exports = {
   restricted,
   validateUserId,
   checkForUserData,
   validateGameId,
-  checkForGameData
+  checkForGameData,
+  validateSystemId,
+  checkForSystemData
 };

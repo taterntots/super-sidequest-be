@@ -70,7 +70,8 @@ router.delete('/:userId', validateUserId, (req, res) => {
 //*************** UPDATE USER *****************//
 router.put('/:userId', validateUserId, (req, res) => {
   const userId = req.params.userId;
-  const changes = req.body;
+  var changes = req.body;
+  changes.updated_at = new Date() // rewrites updated_at timestamp to current time of update
 
   Users.updateUserById(userId, changes)
     .then(response => {

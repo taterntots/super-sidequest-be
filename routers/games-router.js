@@ -70,7 +70,8 @@ router.delete('/:gameId', validateGameId, (req, res) => {
 //*************** UPDATE GAME *****************//
 router.put('/:gameId', validateGameId, (req, res) => {
   const gameId = req.params.gameId;
-  const changes = req.body;
+  var changes = req.body;
+  changes.updated_at = new Date() // rewrites updated_at timestamp to current time of update
 
   Games.updateGameById(gameId, changes)
     .then(response => {
