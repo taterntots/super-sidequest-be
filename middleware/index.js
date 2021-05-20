@@ -1,4 +1,5 @@
 const Users = require('../models/users-model.js')
+const Games = require('../models/games-model.js')
 
 //*************** RESTRICTION (AUTHORIZATION) *****************//
 
@@ -26,7 +27,6 @@ function validateUserId(req, res, next) {
 
   Users.findUsersBy({ id })
     .then(user => {
-      console.log('USER', user)
       if (user.length > 0) {
         next();
       } else {
@@ -82,8 +82,65 @@ function checkForUserData(req, res, next) {
   }
 }
 
+//*************** GAMES ROUTER *****************//
+
+function validateGameId(req, res, next) {
+  const { gameId } = req.params;
+  id = gameId
+
+  Games.findGamesBy({ id })
+    .then(game => {
+      if (game.length > 0) {
+        next();
+      } else {
+        res.status(404).json({
+          errorMessage: 'The game with the specified ID does not exist'
+        });
+      }
+    })
+    .catch(error => {
+      res.status(500).json({
+        errorMessage:
+          'Could not validate game information for the specified ID'
+      });
+    });
+}
+
+function checkForGameData(req, res, next) {
+  if (Object.keys(req.body).length === 0) {
+    res.status(400).json({
+      errorMessage: 'body is empty / missing game data'
+    });
+  } else if (
+    !req.body.name
+  ) {
+    res.status(400).json({
+      errorMessage: 'name is a required field'
+    });
+  } else {
+    Games.findIfGameExists(req.body.name)
+      .then(gamename => {
+        if (gamename) {
+          res.status(400).json({
+            errorMessage: 'game already exists. Please pick a different game.'
+          });
+        } else {
+          next();
+        }
+      })
+      .catch(error => {
+        res.status(500).json({
+          errorMessage:
+            'could not check game data'
+        });
+      });
+  }
+}
+
 module.exports = {
   restricted,
   validateUserId,
-  checkForUserData
+  checkForUserData,
+  validateGameId,
+  checkForGameData
 };
