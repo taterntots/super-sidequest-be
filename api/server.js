@@ -12,7 +12,7 @@ server.use(cors()); //middleware that allows cross domain communication from the
 server.use(morgan('tiny')); //logger middleware
 
 // Authorization Middleware
-// const { restricted } = require('../middleware/index.js');
+const { restricted } = require('../middleware/index.js');
 
 // Router Imports
 const usersRouter = require('../routers/users-router.js');
@@ -26,6 +26,6 @@ server.get('/', (req, res) => {
 });
 
 // Routes
-server.use('/api/users', usersRouter);
+server.use('/api/users', restricted, usersRouter);
 
 module.exports = server;

@@ -1,5 +1,23 @@
 const Users = require('../models/users-model.js')
 
+//*************** RESTRICTION (AUTHORIZATION) *****************//
+
+function restricted(req, res, next) {
+  const token = req.headers.authorization;
+  if (!token) {
+    res
+      .status(401)
+      .json({ errorMessage: 'Token is missing. Must be an authorized user' });
+  }
+  else if (token == process.env.AUTHORIZATION_KEY) {
+    next();
+  } else {
+    res
+      .status(401)
+      .json({ errorMessage: 'Token is incorrect. Must be an authorized user' });
+  }
+}
+
 //*************** USERS ROUTER *****************//
 
 function validateUserId(req, res, next) {
@@ -65,6 +83,7 @@ function checkForUserData(req, res, next) {
 }
 
 module.exports = {
+  restricted,
   validateUserId,
   checkForUserData
 };
