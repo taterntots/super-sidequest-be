@@ -12,6 +12,12 @@ function findGameById(gameId) {
     .first()
 }
 
+//FIND ALL OF A GAME'S CHALLENGES
+function findGameChallenges(gameId) {
+  return db('challenges as c')
+    .where('c.game_id', gameId)
+}
+
 //FIND GAMES BY A SPECIFIC FILTER (NEEDED FOR VALIDATION MIDDLEWARE)
 function findGamesBy(filter) {
   return db('games')
@@ -61,6 +67,7 @@ function findIfGameExists(gameName) {
 module.exports = {
   findGames,
   findGameById,
+  findGameChallenges,
   findGamesBy,
   addGame,
   removeGameById,
