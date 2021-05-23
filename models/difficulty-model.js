@@ -3,6 +3,7 @@ const db = require('../data/dbConfig.js');
 //FIND ALL DIFFICULTIES
 function findDifficulties() {
   return db('difficulty')
+  .orderBy('points', 'asc')
 }
 
 //FIND DIFFICULTY BY ID
