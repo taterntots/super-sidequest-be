@@ -15,6 +15,9 @@ exports.up = function (knex) {
         .unique()
         .notNullable();
       tbl
+        .text('password')
+        .notNullable();
+      tbl
         .text('profile_pic_URL');
       tbl
         .timestamp('created_at')

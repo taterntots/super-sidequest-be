@@ -15,6 +15,8 @@ exports.up = function (knex) {
       tbl
         .text('banner_pic_URL');
       tbl
+        .text('game_pic_URL');
+      tbl
         .timestamp('created_at')
         .notNullable()
         .defaultTo(knex.raw('now()'));
