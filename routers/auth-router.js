@@ -44,7 +44,7 @@ router.post('/login', (req, res) => {
 
         res.status(200).json({ id, username, email, token });
       } else {
-        res.status(401).json({ message: 'Email address and password do not match' });
+        res.status(401).json({ message: 'Email address does not exist or password does not match' });
       }
     })
     .catch(err => {
@@ -65,7 +65,7 @@ router.patch('/forgot-password', async (req, res) => {
     const [user] = await Users.findUsersBy({ email });
     // If there is no user send back an error
     if (!user) {
-      res.status(404).json({ error: "Invalid email" });
+      res.status(404).json({ error: "Email not in our database" });
     } else {
       // Otherwise we need to create a temporary token that expires in 10 mins
       const reset_link = jwt.sign({ user: user.email },
@@ -74,7 +74,7 @@ router.patch('/forgot-password', async (req, res) => {
       await Users.updateUserById(user.id, { reset_link });
       // We'll define this function below
       sendEmail(user, reset_link);
-      res.status(200).json({ message: "Check your email" });
+      res.status(200).json({ message: "Request sent! Please check your email" });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
