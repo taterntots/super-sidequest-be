@@ -53,10 +53,11 @@ function checkForUserData(req, res, next) {
     });
   } else if (
     !req.body.username ||
-    !req.body.email
+    !req.body.email ||
+    !req.body.password
   ) {
     res.status(400).json({
-      errorMessage: 'username and email are required fields'
+      errorMessage: 'username, email, and password are required fields'
     });
   } else {
     Users.findIfUserNameExists(req.body.username)
