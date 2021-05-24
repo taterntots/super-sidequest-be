@@ -20,7 +20,9 @@
   },
   "homepage": "https://github.com/taterntots/taters-tavern-be#readme",
   "dependencies": {
+    "@sendgrid/mail": "^7.4.4",
     "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^9.0.2",
     "express": "^4.17.1",

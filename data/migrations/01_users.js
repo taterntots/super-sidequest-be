@@ -18,6 +18,8 @@ exports.up = function (knex) {
         .text('password')
         .notNullable();
       tbl
+        .text('reset_link')
+      tbl
         .text('profile_pic_URL');
       tbl
         .timestamp('created_at')
