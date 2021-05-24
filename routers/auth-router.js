@@ -102,7 +102,7 @@ router.patch('/reset-password/:token', async (req, res) => {
     const [user] = await Users.findUsersBy({ reset_link });
     // If there is no user, send back an error
     if (!user) {
-      res.status(400).json({ message: 'We could not find a match for this link' });
+      res.status(400).json({ message: 'Could not find a user match for this link. Link is expired.' });
     }
     // Otherwise we need to hash the new password  before saving it in the database
     const hashPassword = bcrypt.hashSync(newPassword.password, 8);
@@ -128,7 +128,7 @@ function sendEmail(user, token) {
     from: "taterntots.twitch@gmail.com",
     subject: "Reset password requested",
     html: `
-     <a href="${process.env.SITE_URL}/reset-password/${token}">${token}</a>
+     <a href="${process.env.SITE_URL}reset-password/?key=${token}">Click here to enter new password</a>
    `
   };
   sgMail.send(msg)
