@@ -20,7 +20,9 @@ router.post('/signup', checkForUserData, (req, res) => {
     .then(newUser => {
       const token = signToken(newUser);
       const { id, username, email } = newUser;
-      res.status(201).json({ id, username, email, token });
+      setTimeout(function () { // Give it some loading time
+        res.status(201).json({ id, username, email, token });
+      }, 2000)
     })
     .catch(err => {
       console.log(err);
@@ -38,14 +40,15 @@ router.post('/login', (req, res) => {
   Users.findUsersBy({ email })
     .first()
     .then(user => {
-      if (user && bcrypt.compareSync(password, user.password)) {
-        const token = signToken(user);
-        const { id, username, email } = user;
-
-        res.status(200).json({ id, username, email, token });
-      } else {
-        res.status(401).json({ message: 'Email address does not exist or password does not match' });
-      }
+      setTimeout(function () { // Give it some loading time
+        if (user && bcrypt.compareSync(password, user.password)) {
+          const token = signToken(user);
+          const { id, username, email } = user;
+          res.status(200).json({ id, username, email, token });
+        } else {
+          res.status(401).json({ message: 'Email address does not exist or password does not match' });
+        }
+      }, 2000)
     })
     .catch(err => {
       console.log(err);
