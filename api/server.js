@@ -12,7 +12,7 @@ server.use(cors()); //middleware that allows cross domain communication from the
 server.use(morgan('tiny')); //logger middleware
 
 // Authorization Middleware
-const { restricted } = require('../middleware/index.js');
+const { restrictedAdmin } = require('../middleware/index.js');
 
 // Router Imports
 const authRouter = require('../routers/auth-router.js');
@@ -32,10 +32,10 @@ server.get('/', (req, res) => {
 
 // Routes
 server.use('/api/auth', authRouter);
-server.use('/api/users', restricted, usersRouter);
-server.use('/api/games', restricted, gamesRouter);
-server.use('/api/systems', restricted, systemsRouter);
-server.use('/api/difficulty', restricted, difficultyRouter);
-server.use('/api/challenges', restricted, challengesRouter);
+server.use('/api/users', restrictedAdmin, usersRouter);
+server.use('/api/games', restrictedAdmin, gamesRouter);
+server.use('/api/systems', restrictedAdmin, systemsRouter);
+server.use('/api/difficulty', restrictedAdmin, difficultyRouter);
+server.use('/api/challenges', challengesRouter);
 
 module.exports = server;

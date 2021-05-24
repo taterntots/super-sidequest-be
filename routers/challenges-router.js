@@ -1,9 +1,9 @@
 const router = require('express').Router();
 const Challenges = require('../models/challenges-model.js')
-const { validateChallengeId, checkForChallengeData } = require('../middleware/index.js');
+const { restrictedAdmin, restrictedUser, validateChallengeId, checkForChallengeData } = require('../middleware/index.js');
 
 //*************** GET ALL CHALLENGES *****************//
-router.get('/', (req, res) => {
+router.get('/', restrictedAdmin, (req, res) => {
   Challenges.findChallenges()
     .then(challenges => {
       res.json(challenges);
@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
 });
 
 //*************** GET CHALLENGE BY ID *****************//
-router.get('/:challengeId', validateChallengeId, (req, res) => {
+router.get('/:challengeId', restrictedAdmin, validateChallengeId, (req, res) => {
   const { challengeId } = req.params;
 
   Challenges.findChallengeById(challengeId)
@@ -33,7 +33,7 @@ router.get('/:challengeId', validateChallengeId, (req, res) => {
 });
 
 //*************** ADD NEW CHALLENGE TO THE DATABASE *****************//
-router.post('/', checkForChallengeData, (req, res) => {
+router.post('/', restrictedUser, checkForChallengeData, (req, res) => {
   let challenge = req.body;
 
   Challenges.addChallenge(challenge)
@@ -49,7 +49,7 @@ router.post('/', checkForChallengeData, (req, res) => {
 });
 
 //*************** REMOVE CHALLENGE FROM THE DATABASE  *****************//
-router.delete('/:challengeId', validateChallengeId, (req, res) => {
+router.delete('/:challengeId', restrictedAdmin, validateChallengeId, (req, res) => {
   const challengeId = req.params.challengeId;
 
   Challenges.removeChallengeById(challengeId)
@@ -68,7 +68,7 @@ router.delete('/:challengeId', validateChallengeId, (req, res) => {
 });
 
 //*************** UPDATE CHALLENGE *****************//
-router.put('/:challengeId', validateChallengeId, (req, res) => {
+router.put('/:challengeId', restrictedAdmin, validateChallengeId, (req, res) => {
   const challengeId = req.params.challengeId;
   var changes = req.body;
   changes.updated_at = new Date() // rewrites updated_at timestamp to current time of update

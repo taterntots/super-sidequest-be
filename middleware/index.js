@@ -3,22 +3,41 @@ const Games = require('../models/games-model.js')
 const Systems = require('../models/systems-model.js')
 const Difficulty = require('../models/difficulty-model.js')
 const Challenges = require('../models/challenges-model.js')
+const jwt = require('jsonwebtoken');
+const { jwtSecret } = require('../config/secret.js');
 
 //*************** RESTRICTION (AUTHORIZATION) *****************//
 
-function restricted(req, res, next) {
+function restrictedAdmin(req, res, next) {
   const token = req.headers.authorization;
   if (!token) {
     res
       .status(401)
-      .json({ errorMessage: 'Token is missing. Must be an authorized user' });
+      .json({ errorMessage: 'Token is missing. Must be an authorized admin' });
   }
   else if (token == process.env.AUTHORIZATION_KEY) {
     next();
   } else {
     res
       .status(401)
-      .json({ errorMessage: 'Token is incorrect. Must be an authorized user' });
+      .json({ errorMessage: 'Token is incorrect. Must be an authorized admin' });
+  }
+}
+
+function restrictedUser(req, res, next) {
+  const token = req.headers.authorization;
+  if (token) {
+    jwt.verify(token, jwtSecret, (err, decodedToken) => {
+      if (err) {
+        //i.e: the token is not valid
+        res.status(401).json({ errorMessage: 'The provided token is invalid / expired' });
+      } else {
+        req.user = { id: decodedToken.id };
+        next();
+      }
+    });
+  } else {
+    res.status(401).json({ errorMessage: 'Must be an authorized user / token is missing' });
   }
 }
 
@@ -283,7 +302,8 @@ function checkForChallengeData(req, res, next) {
 }
 
 module.exports = {
-  restricted,
+  restrictedAdmin,
+  restrictedUser,
   validateUserId,
   checkForUserData,
   validateGameId,
