@@ -15,6 +15,7 @@ server.use(morgan('tiny')); //logger middleware
 const { restricted } = require('../middleware/index.js');
 
 // Router Imports
+const authRouter = require('../routers/auth-router.js');
 const usersRouter = require('../routers/users-router.js');
 const gamesRouter = require('../routers/games-router.js');
 const systemsRouter = require('../routers/systems-router.js');
@@ -30,6 +31,7 @@ server.get('/', (req, res) => {
 });
 
 // Routes
+server.use('/api/auth', authRouter);
 server.use('/api/users', restricted, usersRouter);
 server.use('/api/games', restricted, gamesRouter);
 server.use('/api/systems', restricted, systemsRouter);
