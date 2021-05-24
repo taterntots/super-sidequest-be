@@ -40,7 +40,7 @@ router.post('/login', (req, res) => {
 
         res.status(200).json({ id, username, email, token });
       } else {
-        res.status(401).json({ message: 'Invalid credentials' });
+        res.status(401).json({ message: 'Email address and password do not match' });
       }
     })
     .catch(err => {
