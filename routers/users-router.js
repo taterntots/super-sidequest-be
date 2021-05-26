@@ -44,7 +44,23 @@ router.get('/:userId/created-challenges', validateUserId, (req, res) => {
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        error: `There was an error getting this user's challenges`
+        error: `There was an error getting this user's created challenges`
+      });
+    });
+});
+
+//*************** GET ALL OF A USER'S ACCEPTED CHALLENGES *****************//
+router.get('/:userId/accepted-challenges', validateUserId, (req, res) => {
+  const { userId } = req.params;
+
+  Challenges.findUserAcceptedChallenges(userId)
+    .then(user => {
+      res.json(user);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: `There was an error getting this user's accepted challenges`
       });
     });
 });
