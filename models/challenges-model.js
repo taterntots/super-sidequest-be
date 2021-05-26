@@ -68,6 +68,37 @@ function findChallengesBy(filter) {
     .where(filter);
 }
 
+//FIND ALL OF A USER'S CREATED CHALLENGES
+function findUserCreatedChallenges(userId) {
+  return db('challenges as c')
+    .leftOuterJoin('users as u', 'c.user_id', 'u.id')
+    .leftOuterJoin('games as g', 'c.game_id', 'g.id')
+    .leftOuterJoin('systems as s', 'c.system_id', 's.id')
+    .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
+    .where('c.user_id', userId)
+    .select([
+      'c.id as challenge_id',
+      'c.name',
+      'c.description',
+      'u.username',
+      'g.name as game_title',
+      'g.banner_pic_URL',
+      's.name as system',
+      'd.name as difficulty',
+      'd.points',
+      'c.rules',
+      'c.is_high_score',
+      'c.is_speedrun',
+      'c.featured',
+      'c.prize',
+      'c.start_date',
+      'c.end_date',
+      'c.created_at',
+      'c.updated_at'
+    ])
+    .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id')
+}
+
 //ADD A CHALLENGE TO THE DATABASE
 function addChallenge(challenge) {
   return db('challenges')
@@ -98,6 +129,7 @@ module.exports = {
   findChallenges,
   findChallengeById,
   findChallengesBy,
+  findUserCreatedChallenges,
   addChallenge,
   removeChallengeById,
   updateChallengeById
