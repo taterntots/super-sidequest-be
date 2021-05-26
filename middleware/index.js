@@ -301,6 +301,37 @@ function checkForChallengeData(req, res, next) {
   }
 }
 
+function checkForChallengeAcceptedData(req, res, next) {
+  if (Object.keys(req.body).length === 0) {
+    res.status(400).json({
+      errorMessage: 'body is empty / missing user challenge data'
+    });
+  } else if (
+    !req.body.user_id
+  ) {
+    res.status(400).json({
+      errorMessage: 'user_id is a required field'
+    });
+  } else {
+    Challenges.findIfChallengeAlreadyAccepted(req.body.user_id, req.params.challengeId)
+      .then(userChallenge => {
+        if (userChallenge) {
+          res.status(400).json({
+            errorMessage: 'user has already accepted this challenge.'
+          });
+        } else {
+          next();
+        }
+      })
+      .catch(error => {
+        res.status(500).json({
+          errorMessage:
+            'could not check user challenge data'
+        });
+      });
+  }
+}
+
 module.exports = {
   restrictedAdmin,
   restrictedUser,
@@ -313,5 +344,6 @@ module.exports = {
   validateDifficultyId,
   checkForDifficultyData,
   validateChallengeId,
-  checkForChallengeData
+  checkForChallengeData,
+  checkForChallengeAcceptedData
 };

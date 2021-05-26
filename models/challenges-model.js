@@ -108,6 +108,12 @@ function addChallenge(challenge) {
     });
 }
 
+//ACCEPT A CHALLENGE
+function acceptChallenge(userId, challengeId) {
+  return db('userChallenges')
+    .insert({ user_id: userId, challenge_id: challengeId })
+}
+
 //DELETE A CHALLENGE FROM THE DATABASE
 function removeChallengeById(challengeId) {
   return db('challenges')
@@ -125,12 +131,29 @@ function updateChallengeById(challengeId, changes) {
     })
 }
 
+//FIND IF A USER HAS ALREADY ACCEPTED A CHALLENGE IN OUR DB AND RETURN TRUE OR FALSE
+function findIfChallengeAlreadyAccepted(userId, challengeId) {
+  return db('userChallenges as uc')
+    .where('uc.user_id', userId)
+    .where('uc.challenge_id', challengeId)
+    .first()
+    .then(userChallenge => {
+      if (userChallenge) {
+        return true
+      } else {
+        return false
+      }
+    })
+}
+
 module.exports = {
   findChallenges,
   findChallengeById,
   findChallengesBy,
   findUserCreatedChallenges,
   addChallenge,
+  acceptChallenge,
   removeChallengeById,
-  updateChallengeById
+  updateChallengeById,
+  findIfChallengeAlreadyAccepted
 };

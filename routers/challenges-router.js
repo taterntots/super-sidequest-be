@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const Challenges = require('../models/challenges-model.js')
-const { restrictedAdmin, restrictedUser, validateChallengeId, checkForChallengeData } = require('../middleware/index.js');
+const { restrictedAdmin, restrictedUser, validateChallengeId, checkForChallengeData, checkForChallengeAcceptedData } = require('../middleware/index.js');
 
 //*************** GET ALL CHALLENGES *****************//
 router.get('/', restrictedAdmin, (req, res) => {
@@ -44,6 +44,26 @@ router.post('/', restrictedUser, checkForChallengeData, (req, res) => {
       console.log(err);
       res.status(500).json({
         error: 'There was an error adding this challenge to the database'
+      });
+    });
+});
+
+//*************** ACCEPT A CHALLENGE *****************//
+router.post('/:challengeId/accept', restrictedUser, checkForChallengeAcceptedData, (req, res) => {
+  let { user_id } = req.body;
+  const { challengeId } = req.params;
+
+  console.log(req.body)
+  Challenges.acceptChallenge(user_id, challengeId)
+    .then(response => {
+      res.status(201).json({
+        message: `The challenge was successfully accepted`,
+      });
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error accepting this user challenge'
       });
     });
 });
