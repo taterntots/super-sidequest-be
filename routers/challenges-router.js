@@ -1,6 +1,13 @@
 const router = require('express').Router();
 const Challenges = require('../models/challenges-model.js')
-const { restrictedAdmin, restrictedUser, validateChallengeId, checkForChallengeData, checkForChallengeAcceptedData } = require('../middleware/index.js');
+const {
+  restrictedAdmin,
+  restrictedUser,
+  validateChallengeId,
+  checkForChallengeData,
+  checkForChallengeAcceptedData,
+  checkForChallengeAbandonedData
+} = require('../middleware/index.js');
 
 //*************** GET ALL CHALLENGES *****************//
 router.get('/', restrictedAdmin, (req, res) => {
@@ -53,7 +60,6 @@ router.post('/:challengeId/accept', restrictedUser, checkForChallengeAcceptedDat
   let { user_id } = req.body;
   const { challengeId } = req.params;
 
-  console.log(req.body)
   Challenges.acceptChallenge(user_id, challengeId)
     .then(response => {
       res.status(201).json({
@@ -63,7 +69,26 @@ router.post('/:challengeId/accept', restrictedUser, checkForChallengeAcceptedDat
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        error: 'There was an error accepting this user challenge'
+        errorMessage: 'There was an error accepting this user challenge'
+      });
+    });
+});
+
+//*************** ABANDON A CHALLENGE *****************//
+router.delete('/:challengeId/abandon', restrictedUser, checkForChallengeAbandonedData, (req, res) => {
+  let { user_id } = req.body;
+  const { challengeId } = req.params;
+
+  Challenges.abandonChallenge(user_id, challengeId)
+    .then(response => {
+      res.status(201).json({
+        message: `The challenge was successfully abandoned`,
+      });
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        errorMessage: 'There was an error abandoning this user challenge'
       });
     });
 });

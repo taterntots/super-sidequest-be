@@ -146,6 +146,14 @@ function acceptChallenge(userId, challengeId) {
     .insert({ user_id: userId, challenge_id: challengeId })
 }
 
+//ABANDON A CHALLENGE
+function abandonChallenge(userId, challengeId) {
+  return db('userChallenges')
+    .where('user_id', userId)
+    .where('challenge_id', challengeId)
+    .del()
+}
+
 //DELETE A CHALLENGE FROM THE DATABASE
 function removeChallengeById(challengeId) {
   return db('challenges')
@@ -186,6 +194,7 @@ module.exports = {
   findUserAcceptedChallenges,
   addChallenge,
   acceptChallenge,
+  abandonChallenge,
   removeChallengeById,
   updateChallengeById,
   findIfChallengeAlreadyAccepted
