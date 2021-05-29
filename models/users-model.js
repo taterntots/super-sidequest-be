@@ -12,6 +12,13 @@ function findUserById(userId) {
     .first()
 }
 
+//FIND USER BY USERNAME
+function findUserByUsername(username) {
+  return db('users as u')
+    .where('u.username', username)
+    .first()
+}
+
 //FIND USERS BY A SPECIFIC FILTER (NEEDED FOR VALIDATION MIDDLEWARE)
 function findUsersBy(filter) {
   return db('users')
@@ -75,6 +82,7 @@ function findIfUserNameExists(username) {
 module.exports = {
   findUsers,
   findUserById,
+  findUserByUsername,
   findUsersBy,
   addUser,
   removeUserById,

@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const Users = require('../models/users-model.js')
 const Challenges = require('../models/challenges-model.js')
-const { validateUserId, checkForUserData } = require('../middleware/index.js');
+const { validateUserId, validateUsername, checkForUserData } = require('../middleware/index.js');
 
 //*************** GET ALL USERS *****************//
 router.get('/', (req, res) => {
@@ -22,6 +22,22 @@ router.get('/:userId', validateUserId, (req, res) => {
   const { userId } = req.params;
 
   Users.findUserById(userId)
+    .then(user => {
+      res.json(user);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting this user'
+      });
+    });
+});
+
+//*************** GET USER BY USERNAME *****************//
+router.get('/username/:username', validateUsername, (req, res) => {
+  const { username } = req.params;
+
+  Users.findUserByUsername(username)
     .then(user => {
       res.json(user);
     })

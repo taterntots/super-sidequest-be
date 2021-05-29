@@ -65,6 +65,27 @@ function validateUserId(req, res, next) {
     });
 }
 
+function validateUsername(req, res, next) {
+  const { username } = req.params;
+
+  Users.findUsersBy({ username })
+    .then(user => {
+      if (user.length > 0) {
+        next();
+      } else {
+        res.status(404).json({
+          errorMessage: 'The user with the specified username does not exist'
+        });
+      }
+    })
+    .catch(error => {
+      res.status(500).json({
+        errorMessage:
+          'Could not validate user information for the specified ID'
+      });
+    });
+}
+
 function checkForUserData(req, res, next) {
   if (Object.keys(req.body).length === 0) {
     res.status(400).json({
@@ -367,6 +388,7 @@ module.exports = {
   restrictedAdmin,
   restrictedUser,
   validateUserId,
+  validateUsername,
   checkForUserData,
   validateGameId,
   checkForGameData,
