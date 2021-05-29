@@ -74,6 +74,23 @@ router.post('/:challengeId/accept', restrictedUser, checkForChallengeAcceptedDat
     });
 });
 
+//*************** FIND IF CHALLENGE IS ALREADY ACCEPTED BY A USER *****************//
+router.get('/:challengeId/user/:userId/accepted', restrictedAdmin, validateChallengeId, (req, res) => {
+  const { challengeId } = req.params;
+  const { userId } = req.params;
+
+  Challenges.findIfChallengeAlreadyAccepted(userId, challengeId)
+    .then(response => {
+      res.json(response);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting this challenge'
+      });
+    });
+});
+
 //*************** ABANDON A CHALLENGE *****************//
 router.delete('/:challengeId/abandon', restrictedUser, checkForChallengeAbandonedData, (req, res) => {
   let { user_id } = req.body;
