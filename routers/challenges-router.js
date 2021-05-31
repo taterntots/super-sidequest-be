@@ -110,6 +110,22 @@ router.delete('/:challengeId/abandon', restrictedUser, checkForChallengeAbandone
     });
 });
 
+//*************** FIND ALL CHALLENGE HIGH SCORES *****************//
+router.get('/:challengeId/highscores', restrictedAdmin, validateChallengeId, (req, res) => {
+  const { challengeId } = req.params;
+
+  Challenges.findAllChallengeHighScores(challengeId)
+    .then(response => {
+      res.json(response);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting the high scores for this challenge'
+      });
+    });
+});
+
 //*************** REMOVE CHALLENGE FROM THE DATABASE  *****************//
 router.delete('/:challengeId', restrictedAdmin, validateChallengeId, (req, res) => {
   const challengeId = req.params.challengeId;

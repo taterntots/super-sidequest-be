@@ -1,3 +1,4 @@
+const e = require('express');
 const db = require('../data/dbConfig.js');
 
 //FIND ALL CHALLENGES
@@ -131,6 +132,27 @@ function findUserAcceptedChallenges(userId) {
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id')
 }
 
+//FIND HIGH SCORE LEADERBOARD FOR A GIVEN CHALLENGE
+function findAllChallengeHighScores(challengeId) {
+  return db('userChallenges as uc')
+    .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+    .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
+    .where('uc.challenge_id', challengeId)
+    .where('c.is_high_score', true)
+    .select([
+      'uc.*',
+      'u.username'
+    ])
+    .groupBy('c.id', 'uc.id', 'u.id')
+    .then(response => {
+      if (response.length > 0) {
+        return response
+      } else {
+        return false
+      }
+    })
+}
+
 //ADD A CHALLENGE TO THE DATABASE
 function addChallenge(challenge) {
   return db('challenges')
@@ -192,6 +214,7 @@ module.exports = {
   findChallengesBy,
   findUserCreatedChallenges,
   findUserAcceptedChallenges,
+  findAllChallengeHighScores,
   addChallenge,
   acceptChallenge,
   abandonChallenge,
