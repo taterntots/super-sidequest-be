@@ -166,10 +166,15 @@ function findAllChallengeSpeedruns(challengeId) {
       'u.username'
     ])
     .groupBy('c.id', 'uc.id', 'u.id')
-    .orderBy('uc.speedrun_hours', 'asc')
+    .orderBy('uc.total_milliseconds', 'asc')
     .then(response => {
-      console.log(response)
       if (response.length > 0) {
+        // return Promise.all(response.map(score => {
+        //   return {
+        //     ...score,
+        //     personal_best: `${score.speedrun_hours}:${score.speedrun_minutes}:${score.speedrun_seconds}.${score.speedrun_milliseconds}`
+        //   }
+        // }))
         return response
       } else {
         return false
