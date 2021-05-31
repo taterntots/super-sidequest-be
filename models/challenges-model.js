@@ -144,7 +144,7 @@ function findAllChallengeHighScores(challengeId) {
       'u.username'
     ])
     .groupBy('c.id', 'uc.id', 'u.id')
-    .orderBy('uc.high_score', 'asc')
+    .orderBy('uc.high_score', 'desc')
     .then(response => {
       if (response.length > 0) {
         return response
