@@ -154,6 +154,29 @@ function findAllChallengeHighScores(challengeId) {
     })
 }
 
+//FIND SPEEDRUN LEADERBOARD FOR A GIVEN CHALLENGE
+function findAllChallengeSpeedruns(challengeId) {
+  return db('userChallenges as uc')
+    .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+    .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
+    .where('uc.challenge_id', challengeId)
+    .where('c.is_speedrun', true)
+    .select([
+      'uc.*',
+      'u.username'
+    ])
+    .groupBy('c.id', 'uc.id', 'u.id')
+    .orderBy('uc.speedrun_hours', 'asc')
+    .then(response => {
+      console.log(response)
+      if (response.length > 0) {
+        return response
+      } else {
+        return false
+      }
+    })
+}
+
 //ADD A CHALLENGE TO THE DATABASE
 function addChallenge(challenge) {
   return db('challenges')
@@ -216,7 +239,7 @@ function findIfChallengeAlreadyAccepted(userId, challengeId) {
     .first()
     .then(userChallenge => {
       if (userChallenge) {
-        return true
+        return userChallenge
       } else {
         return false
       }
@@ -230,6 +253,7 @@ module.exports = {
   findUserCreatedChallenges,
   findUserAcceptedChallenges,
   findAllChallengeHighScores,
+  findAllChallengeSpeedruns,
   addChallenge,
   acceptChallenge,
   abandonChallenge,

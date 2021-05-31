@@ -76,7 +76,7 @@ router.post('/:challengeId/accept', restrictedUser, checkForChallengeAcceptedDat
 });
 
 //*************** FIND IF CHALLENGE IS ALREADY ACCEPTED BY A USER *****************//
-router.get('/:challengeId/user/:userId/accepted', restrictedAdmin, validateChallengeId, (req, res) => {
+router.get('/:challengeId/user/:userId/accepted', restrictedAdmin, validateChallengeId, validateUserId, (req, res) => {
   const { challengeId } = req.params;
   const { userId } = req.params;
 
@@ -123,6 +123,22 @@ router.get('/:challengeId/highscores', restrictedAdmin, validateChallengeId, (re
       console.log(err);
       res.status(500).json({
         error: 'There was an error getting the high scores for this challenge'
+      });
+    });
+});
+
+//*************** FIND ALL CHALLENGE SPEEDRUNS *****************//
+router.get('/:challengeId/speedruns', restrictedAdmin, validateChallengeId, (req, res) => {
+  const { challengeId } = req.params;
+
+  Challenges.findAllChallengeSpeedruns(challengeId)
+    .then(response => {
+      res.json(response);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting the speedruns for this challenge'
       });
     });
 });
