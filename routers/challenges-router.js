@@ -6,7 +6,8 @@ const {
   validateChallengeId,
   checkForChallengeData,
   checkForChallengeAcceptedData,
-  checkForChallengeAbandonedData
+  checkForChallengeAbandonedData,
+  validateUserId
 } = require('../middleware/index.js');
 
 //*************** GET ALL CHALLENGES *****************//
@@ -159,6 +160,25 @@ router.put('/:challengeId', restrictedAdmin, validateChallengeId, (req, res) => 
       console.log(err);
       res.status(500).json({
         error: `There was an error updating this challenge`
+      });
+    });
+});
+
+//*************** UPDATE USER CHALLENGE PROGRESS *****************//
+router.put('/:challengeId/users/:userId/update', restrictedUser, validateChallengeId, validateUserId, (req, res) => {
+  const challengeId = req.params.challengeId;
+  const userId = req.params.userId;
+  var changes = req.body;
+  changes.updated_at = new Date() // rewrites updated_at timestamp to current time of update
+
+  Challenges.updateUserChallengeProgress(challengeId, userId, changes)
+    .then(response => {
+      res.status(200).json({ updatedUserChallengeProgress: response });
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: `There was an error updating this user's challenge progress`
       });
     });
 });

@@ -194,6 +194,20 @@ function updateChallengeById(challengeId, changes) {
     })
 }
 
+//UPDATE USER CHALLENGE PROGRESS
+function updateUserChallengeProgress(challengeId, userId, changes) {
+  return db('userChallenges as uc')
+    .where('uc.challenge_id', challengeId)
+    .where('uc.user_id', userId)
+    .update(changes)
+    .then(userChallenge => {
+      return db('userChallenges as uc')
+        .where('uc.challenge_id', challengeId)
+        .where('uc.user_id', userId)
+        .first()
+    })
+}
+
 //FIND IF A USER HAS ALREADY ACCEPTED A CHALLENGE IN OUR DB AND RETURN TRUE OR FALSE
 function findIfChallengeAlreadyAccepted(userId, challengeId) {
   return db('userChallenges as uc')
@@ -221,5 +235,6 @@ module.exports = {
   abandonChallenge,
   removeChallengeById,
   updateChallengeById,
+  updateUserChallengeProgress,
   findIfChallengeAlreadyAccepted
 };
