@@ -169,12 +169,6 @@ function findAllChallengeSpeedruns(challengeId) {
     .orderBy('uc.total_milliseconds', 'asc')
     .then(response => {
       if (response.length > 0) {
-        // return Promise.all(response.map(score => {
-        //   return {
-        //     ...score,
-        //     personal_best: `${score.speedrun_hours}:${score.speedrun_minutes}:${score.speedrun_seconds}.${score.speedrun_milliseconds}`
-        //   }
-        // }))
         return response
       } else {
         return false

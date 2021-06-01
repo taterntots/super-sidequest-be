@@ -138,7 +138,7 @@ router.get('/:challengeId/speedruns', restrictedAdmin, validateChallengeId, (req
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        error: 'There was an error getting the speedruns for this challenge'
+        errorMessage: 'There was an error getting the speedruns for this challenge'
       });
     });
 });
@@ -194,7 +194,7 @@ router.put('/:challengeId/users/:userId/update', restrictedUser, validateChallen
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        error: `There was an error updating this user's challenge progress`
+        errorMessage: `There was an error updating this user's challenge progress`
       });
     });
 });
