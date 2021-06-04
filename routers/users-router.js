@@ -97,6 +97,22 @@ router.get('/:userId/games/stats', validateUserId, (req, res) => {
     });
 });
 
+//*************** FIND A USER'S FEATURED QUEST *****************//
+router.get('/:userId/challenges/featured', validateUserId, (req, res) => {
+  const { userId } = req.params;
+
+  Challenges.findUserFeaturedQuest(userId)
+    .then(response => {
+      res.json(response);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        errorMessage: `There was an error getting the user's featured quest`
+      });
+    });
+});
+
 //*************** ADD NEW USER TO THE DATABASE *****************//
 router.post('/', checkForUserData, (req, res) => {
   let user = req.body;

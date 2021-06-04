@@ -178,6 +178,14 @@ function findAllChallengeSpeedruns(challengeId) {
     })
 }
 
+//FIND A USER'S FEATURED QUEST
+function findUserFeaturedQuest(userId) {
+  return db('challenges as c')
+    .where('c.user_id', userId)
+    .where('c.featured', true)
+    .first()
+}
+
 //ADD A CHALLENGE TO THE DATABASE
 function addChallenge(challenge) {
   return db('challenges')
@@ -294,6 +302,7 @@ module.exports = {
   findUserAcceptedChallenges,
   findAllChallengeHighScores,
   findAllChallengeSpeedruns,
+  findUserFeaturedQuest,
   addChallenge,
   acceptChallenge,
   abandonChallenge,
