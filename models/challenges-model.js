@@ -108,6 +108,7 @@ function findUserAcceptedChallenges(userId) {
     .leftOuterJoin('systems as s', 'c.system_id', 's.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
     .where('uc.user_id', userId)
+    .where('completed', false)
     .select([
       'c.id as challenge_id',
       'c.name',
