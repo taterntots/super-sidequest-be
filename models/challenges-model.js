@@ -254,14 +254,22 @@ function findUserCompletedChallengeTotal(userId) {
     .where('uc.completed', true)
     .select('g.name')
     .then(userChallenges => {
-      gameStats = {}
+      gameStatsHash = {}
+      gameStats = []
       userChallenges.map(userChallenge => {
-        if (gameStats.hasOwnProperty(userChallenge.name)) {
-          gameStats[userChallenge.name] += 1
+        if (gameStatsHash.hasOwnProperty(userChallenge.name)) {
+          gameStatsHash[userChallenge.name] += 1
+
         } else {
-          gameStats[userChallenge.name] = 1
+          gameStatsHash[userChallenge.name] = 1
         }
       })
+      for (const [key, value] of Object.entries(gameStatsHash)) {
+        gameStats.push({
+          game: key,
+          total_challenges_completed: value
+        })
+      }
       return gameStats
     })
 }
