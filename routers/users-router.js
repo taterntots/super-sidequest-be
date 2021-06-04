@@ -81,6 +81,22 @@ router.get('/:userId/accepted-challenges', validateUserId, (req, res) => {
     });
 });
 
+//*************** GET A USER'S COMPLETED CHALLENGE TOTAL FOR ALL GAMES *****************//
+router.get('/:userId/games/stats', validateUserId, (req, res) => {
+  const { userId } = req.params;
+
+  Challenges.findUserCompletedChallengeTotal(userId)
+    .then(user => {
+      res.json(user);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: `There was an error getting stats for this user's games`
+      });
+    });
+});
+
 //*************** ADD NEW USER TO THE DATABASE *****************//
 router.post('/', checkForUserData, (req, res) => {
   let user = req.body;

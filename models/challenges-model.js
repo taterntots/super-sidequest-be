@@ -245,6 +245,27 @@ function findIfChallengeAlreadyAccepted(userId, challengeId) {
     })
 }
 
+//FIND A USER'S COMPLETED CHALLENGE TOTAL FOR ALL GAMES
+function findUserCompletedChallengeTotal(userId) {
+  return db('userChallenges as uc')
+    .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+    .leftOuterJoin('games as g', 'c.game_id', 'g.id')
+    .where('uc.user_id', userId)
+    .where('uc.completed', true)
+    .select('g.name')
+    .then(userChallenges => {
+      gameStats = {}
+      userChallenges.map(userChallenge => {
+        if (gameStats.hasOwnProperty(userChallenge.name)) {
+          gameStats[userChallenge.name] += 1
+        } else {
+          gameStats[userChallenge.name] = 1
+        }
+      })
+      return gameStats
+    })
+}
+
 module.exports = {
   findChallenges,
   findChallengeById,
@@ -259,5 +280,6 @@ module.exports = {
   removeChallengeById,
   updateChallengeById,
   updateUserChallengeProgress,
-  findIfChallengeAlreadyAccepted
+  findIfChallengeAlreadyAccepted,
+  findUserCompletedChallengeTotal
 };
