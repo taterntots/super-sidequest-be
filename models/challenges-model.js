@@ -125,10 +125,12 @@ function findUserAcceptedChallenges(userId) {
       'c.prize',
       'c.start_date',
       'c.end_date',
+      'uc.completed',
+      'uc.is_active',
       'c.created_at',
       'c.updated_at'
     ])
-    .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id')
+    .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id', 'uc.id')
 }
 
 //FIND HIGH SCORE LEADERBOARD FOR A GIVEN CHALLENGE
