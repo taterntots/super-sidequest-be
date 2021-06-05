@@ -97,18 +97,18 @@ router.get('/:userId/games/stats', validateUserId, (req, res) => {
     });
 });
 
-//*************** FIND A USER'S FEATURED QUEST *****************//
+//*************** FIND A USER'S FEATURED CHALLENGE *****************//
 router.get('/:userId/challenges/featured', validateUserId, (req, res) => {
   const { userId } = req.params;
 
-  Challenges.findUserFeaturedQuest(userId)
+  Challenges.findUserFeaturedChallenge(userId)
     .then(response => {
       res.json(response);
     })
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        errorMessage: `There was an error getting the user's featured quest`
+        errorMessage: `There was an error getting the user's featured challenge`
       });
     });
 });

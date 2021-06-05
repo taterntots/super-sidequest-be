@@ -178,8 +178,8 @@ function findAllChallengeSpeedruns(challengeId) {
     })
 }
 
-//FIND A USER'S FEATURED QUEST
-function findUserFeaturedQuest(userId) {
+//FIND A USER'S FEATURED CHALLENGE
+function findUserFeaturedChallenge(userId) {
   return db('challenges as c')
     .where('c.user_id', userId)
     .where('c.featured', true)
@@ -237,6 +237,23 @@ function updateUserChallengeProgress(challengeId, userId, changes) {
         .where('uc.challenge_id', challengeId)
         .where('uc.user_id', userId)
         .first()
+    })
+}
+
+//UPDATE USER'S FEATURED CHALLENGE
+function updateUserFeaturedChallenge(challengeId) {
+  return db('challenges as c')
+    // REMOVE FEATURE STATUS FROM PREVIOUSLY FEATURED CHALLENGE. USER ONLY GETS ONE AT A TIME
+    .where('c.featured', true)
+    .update({ featured: false, updated_at: new Date() })
+    .then(res => {
+      // UPDATE NEW CHUNK WITH FEATURED STATUS
+      return db('challenges as c')
+        .where('c.id', challengeId)
+        .update({ featured: true, updated_at: new Date() })
+        .then(res => {
+          return findChallengeById(challengeId);
+        })
     })
 }
 
@@ -302,13 +319,14 @@ module.exports = {
   findUserAcceptedChallenges,
   findAllChallengeHighScores,
   findAllChallengeSpeedruns,
-  findUserFeaturedQuest,
+  findUserFeaturedChallenge,
   addChallenge,
   acceptChallenge,
   abandonChallenge,
   removeChallengeById,
   updateChallengeById,
   updateUserChallengeProgress,
+  updateUserFeaturedChallenge,
   findIfChallengeAlreadyAccepted,
   findUserCompletedChallengeTotal
 };

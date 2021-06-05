@@ -199,4 +199,20 @@ router.put('/:challengeId/users/:userId/update', restrictedUser, validateChallen
     });
 });
 
+//*************** UPDATE A USER'S FEATURED CHALLENGE *****************//
+router.put('/:challengeId/featured', restrictedUser, validateChallengeId, (req, res) => {
+  const challengeId = req.params.challengeId;
+
+  Challenges.updateUserFeaturedChallenge(challengeId)
+    .then(response => {
+      res.status(200).json({ updatedUserFeaturedChallenge: response });
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: `There was an error updating this user featured challenge`
+      });
+    });
+});
+
 module.exports = router;
