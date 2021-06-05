@@ -184,6 +184,9 @@ function findUserFeaturedChallenge(userId) {
     .where('c.user_id', userId)
     .where('c.featured', true)
     .first()
+    .then(res => {
+      return findChallengeById(res.id)
+    })
 }
 
 //ADD A CHALLENGE TO THE DATABASE
