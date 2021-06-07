@@ -185,7 +185,11 @@ function findUserFeaturedChallenge(userId) {
     .where('c.featured', true)
     .first()
     .then(res => {
-      return findChallengeById(res.id)
+      if (res) {
+        return findChallengeById(res.id)
+      } else {
+        return {}
+      }
     })
 }
 
@@ -244,20 +248,30 @@ function updateUserChallengeProgress(challengeId, userId, changes) {
 }
 
 //UPDATE USER'S FEATURED CHALLENGE
-function updateUserFeaturedChallenge(challengeId) {
-  return db('challenges as c')
-    // REMOVE FEATURE STATUS FROM PREVIOUSLY FEATURED CHALLENGE. USER ONLY GETS ONE AT A TIME
-    .where('c.featured', true)
-    .update({ featured: false, updated_at: new Date() })
-    .then(res => {
-      // UPDATE NEW CHUNK WITH FEATURED STATUS
-      return db('challenges as c')
-        .where('c.id', challengeId)
-        .update({ featured: true, updated_at: new Date() })
-        .then(res => {
-          return findChallengeById(challengeId);
-        })
-    })
+function updateUserFeaturedChallenge(challengeId, changes) {
+  if (!changes.featured) {
+    return db('challenges as c')
+      // REMOVE FEATURE STATUS FROM PREVIOUSLY FEATURED CHALLENGE. USER ONLY GETS ONE AT A TIME
+      .where('c.featured', true)
+      .update({ featured: false, updated_at: new Date() })
+      .then(res => {
+        return findChallengeById(challengeId);
+      })
+  } else {
+    return db('challenges as c')
+      // REMOVE FEATURE STATUS FROM PREVIOUSLY FEATURED CHALLENGE. USER ONLY GETS ONE AT A TIME
+      .where('c.featured', true)
+      .update({ featured: false, updated_at: new Date() })
+      .then(res => {
+        // UPDATE NEW CHALLENGE WITH FEATURED STATUS
+        return db('challenges as c')
+          .where('c.id', challengeId)
+          .update({ featured: true, updated_at: new Date() })
+          .then(res => {
+            return findChallengeById(challengeId);
+          })
+      })
+  }
 }
 
 //FIND IF A USER HAS ALREADY ACCEPTED A CHALLENGE IN OUR DB AND RETURN TRUE OR FALSE
