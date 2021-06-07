@@ -106,7 +106,7 @@ function findUserCreatedChallenges(userId) {
 function findUserAcceptedChallenges(userId) {
   return db('userChallenges as uc')
     .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
-    .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
+    .leftOuterJoin('users as u', 'c.user_id', 'u.id')
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
     .leftOuterJoin('systems as s', 'c.system_id', 's.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
