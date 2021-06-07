@@ -147,8 +147,7 @@ function findAllChallengeHighScores(challengeId) {
     .where('c.is_high_score', true)
     .select([
       'uc.*',
-      'u.username',
-      'c.user_id'
+      'u.username'
     ])
     .groupBy('c.id', 'uc.id', 'u.id')
     .orderBy('uc.high_score', 'desc')
@@ -170,8 +169,7 @@ function findAllChallengeSpeedruns(challengeId) {
     .where('c.is_speedrun', true)
     .select([
       'uc.*',
-      'u.username',
-      'c.user_id'
+      'u.username'
     ])
     .groupBy('c.id', 'uc.id', 'u.id')
     .orderBy('uc.total_milliseconds', 'asc')
