@@ -12,6 +12,7 @@ function findChallenges() {
       'c.name',
       'c.description',
       'u.username',
+      'c.user_id',
       'g.name as game_title',
       'g.banner_pic_URL',
       's.name as system',
@@ -44,6 +45,7 @@ function findChallengeById(challengeId) {
       'c.name',
       'c.description',
       'u.username',
+      'c.user_id',
       'g.name as game_title',
       'g.banner_pic_URL',
       's.name as system',
@@ -81,6 +83,7 @@ function findUserCreatedChallenges(userId) {
       'c.name',
       'c.description',
       'u.username',
+      'c.user_id',
       'g.name as game_title',
       'g.banner_pic_URL',
       's.name as system',
@@ -114,6 +117,7 @@ function findUserAcceptedChallenges(userId) {
       'c.name',
       'c.description',
       'u.username',
+      'c.user_id',
       'g.name as game_title',
       'g.banner_pic_URL',
       's.name as system',
@@ -143,7 +147,8 @@ function findAllChallengeHighScores(challengeId) {
     .where('c.is_high_score', true)
     .select([
       'uc.*',
-      'u.username'
+      'u.username',
+      'c.user_id'
     ])
     .groupBy('c.id', 'uc.id', 'u.id')
     .orderBy('uc.high_score', 'desc')
@@ -165,7 +170,8 @@ function findAllChallengeSpeedruns(challengeId) {
     .where('c.is_speedrun', true)
     .select([
       'uc.*',
-      'u.username'
+      'u.username',
+      'c.user_id'
     ])
     .groupBy('c.id', 'uc.id', 'u.id')
     .orderBy('uc.total_milliseconds', 'asc')
