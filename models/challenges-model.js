@@ -138,6 +138,42 @@ function findUserAcceptedChallenges(userId) {
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id', 'uc.id')
 }
 
+//FIND ALL OF A USER'S COMPLETED CHALLENGES
+function findUserCompletedChallenges(userId) {
+  return db('userChallenges as uc')
+    .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+    .leftOuterJoin('users as u', 'c.user_id', 'u.id')
+    .leftOuterJoin('games as g', 'c.game_id', 'g.id')
+    .leftOuterJoin('systems as s', 'c.system_id', 's.id')
+    .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
+    .where('uc.user_id', userId)
+    .where('completed', true)
+    .select([
+      'c.id as challenge_id',
+      'c.name',
+      'c.description',
+      'u.username',
+      'c.user_id',
+      'g.name as game_title',
+      'g.banner_pic_URL',
+      's.name as system',
+      'd.name as difficulty',
+      'd.points',
+      'c.rules',
+      'c.is_high_score',
+      'c.is_speedrun',
+      'c.featured',
+      'c.prize',
+      'c.start_date',
+      'c.end_date',
+      'uc.completed',
+      'uc.is_active',
+      'c.created_at',
+      'c.updated_at'
+    ])
+    .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id', 'uc.id')
+}
+
 //FIND HIGH SCORE LEADERBOARD FOR A GIVEN CHALLENGE
 function findAllChallengeHighScores(challengeId) {
   return db('userChallenges as uc')
@@ -338,6 +374,7 @@ module.exports = {
   findChallengesBy,
   findUserCreatedChallenges,
   findUserAcceptedChallenges,
+  findUserCompletedChallenges,
   findAllChallengeHighScores,
   findAllChallengeSpeedruns,
   findUserFeaturedChallenge,
