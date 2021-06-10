@@ -364,7 +364,20 @@ function findUserCompletedChallengeTotal(userId) {
           total_challenges_completed: value
         })
       }
-      return gameStats
+
+      // Return objects with game IDs attached
+      return Promise.all(gameStats.map(gameStat => {
+        return db('games as g')
+          .where('g.name', gameStat.game)
+          .first()
+          .then(game => {
+            console.log(game)
+            return {
+              ...gameStat,
+              game_id: game.id
+            }
+          })
+      }))
     })
 }
 
