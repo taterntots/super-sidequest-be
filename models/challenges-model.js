@@ -218,6 +218,29 @@ function findAllChallengeSpeedruns(challengeId) {
     })
 }
 
+//FIND FOR GLORY LEADERBOARD FOR A GIVEN CHALLENGE
+function findAllChallengeForGlorys(challengeId) {
+  return db('userChallenges as uc')
+    .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+    .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
+    .where('uc.challenge_id', challengeId)
+    .where('c.is_speedrun', false)
+    .where('c.is_high_score', false)
+    .select([
+      'uc.*',
+      'u.username'
+    ])
+    .groupBy('c.id', 'uc.id', 'u.id')
+    .orderBy('uc.updated_at', 'asc')
+    .then(response => {
+      if (response.length > 0) {
+        return response
+      } else {
+        return false
+      }
+    })
+}
+
 //FIND A USER'S FEATURED CHALLENGE
 function findUserFeaturedChallenge(userId) {
   return db('challenges as c')
@@ -390,6 +413,7 @@ module.exports = {
   findUserCompletedChallenges,
   findAllChallengeHighScores,
   findAllChallengeSpeedruns,
+  findAllChallengeForGlorys,
   findUserFeaturedChallenge,
   addChallenge,
   acceptChallenge,

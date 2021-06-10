@@ -143,6 +143,22 @@ router.get('/:challengeId/speedruns', restrictedAdmin, validateChallengeId, (req
     });
 });
 
+//*************** FIND ALL CHALLENGE FOR GLORYS *****************//
+router.get('/:challengeId/glory', restrictedAdmin, validateChallengeId, (req, res) => {
+  const { challengeId } = req.params;
+
+  Challenges.findAllChallengeForGlorys(challengeId)
+    .then(response => {
+      res.json(response);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        errorMessage: 'There was an error getting the for glorys for this challenge'
+      });
+    });
+});
+
 //*************** REMOVE CHALLENGE FROM THE DATABASE  *****************//
 router.delete('/:challengeId', restrictedAdmin, validateChallengeId, (req, res) => {
   const challengeId = req.params.challengeId;
