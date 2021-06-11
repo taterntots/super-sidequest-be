@@ -59,7 +59,7 @@ router.get('/:gameId/challenges/popular', validateGameId, (req, res) => {
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        error: 'There was an error getting all game challenges to display'
+        error: 'There was an error getting all game challenges sorted by popularity to display'
       });
     });
 });
