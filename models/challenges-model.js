@@ -226,18 +226,33 @@ function findAllChallengeForGlorys(challengeId) {
     .where('uc.challenge_id', challengeId)
     .where('c.is_speedrun', false)
     .where('c.is_high_score', false)
+    .where('uc.completed', true)
     .select([
       'uc.*',
       'u.username'
     ])
     .groupBy('c.id', 'uc.id', 'u.id')
     .orderBy('uc.updated_at', 'asc')
-    .then(response => {
-      if (response.length > 0) {
-        return response
-      } else {
-        return false
-      }
+    .then(glorysComplete => {
+      return db('userChallenges as uc')
+        .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+        .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
+        .where('uc.challenge_id', challengeId)
+        .where('c.is_speedrun', false)
+        .where('c.is_high_score', false)
+        .where('uc.completed', false)
+        .select([
+          'uc.*',
+          'u.username'
+        ])
+        .groupBy('c.id', 'uc.id', 'u.id')
+        .orderBy('uc.updated_at', 'asc')
+        .then(glorysIncomplete => {
+          Promise.all(glorysIncomplete.map(gloryIncomplete => {
+            glorysComplete.push(gloryIncomplete)
+          }))
+          return glorysComplete
+        })
     })
 }
 
