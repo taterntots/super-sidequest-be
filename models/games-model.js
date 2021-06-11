@@ -41,6 +41,7 @@ function findGameChallenges(gameId) {
       'c.updated_at'
     ])
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id')
+    .orderBy('c.created_at', 'desc')
 }
 
 //FIND GAMES BY A SPECIFIC FILTER (NEEDED FOR VALIDATION MIDDLEWARE)
