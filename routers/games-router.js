@@ -48,6 +48,22 @@ router.get('/:gameId/challenges', validateGameId, (req, res) => {
     });
 });
 
+//*************** GET ALL OF A GAME'S CHALLENGES SORTED BY POPULARITY *****************//
+router.get('/:gameId/challenges/popular', validateGameId, (req, res) => {
+  const { gameId } = req.params;
+
+  Games.findGameChallengesByPopularity(gameId)
+    .then(challenges => {
+      res.json(challenges);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all game challenges to display'
+      });
+    });
+});
+
 //*************** ADD NEW GAME TO THE DATABASE *****************//
 router.post('/', checkForGameData, (req, res) => {
   let game = req.body;
