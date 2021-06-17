@@ -24,6 +24,20 @@ router.get('/', restrictedAdmin, (req, res) => {
     });
 });
 
+//*************** GET ALL RECENT CHALLENGES (LIMITED) *****************//
+router.get('/recent', restrictedAdmin, (req, res) => {
+  Challenges.findRecentChallenges()
+    .then(challenges => {
+      res.json(challenges);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all recent challenges to display'
+      });
+    });
+});
+
 //*************** GET CHALLENGE BY ID *****************//
 router.get('/:challengeId', restrictedAdmin, validateChallengeId, (req, res) => {
   const { challengeId } = req.params;
