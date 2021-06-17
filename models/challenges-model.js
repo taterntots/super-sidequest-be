@@ -29,6 +29,7 @@ function findChallenges() {
       'c.updated_at'
     ])
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id')
+    .orderBy('c.created_at', 'desc')
 }
 
 //FIND CHALLENGE BY ID
