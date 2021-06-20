@@ -134,6 +134,26 @@ function findUserCreatedChallenges(userId) {
       'c.updated_at'
     ])
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id')
+    .then(createdChallenges => {
+      // Loop through created challenges, attaching a completed bool if a user has accepted a challenge
+      return Promise.all(createdChallenges.map(createdChallenge => {
+        return db('userChallenges as uc')
+          .where('uc.challenge_id', createdChallenge.challenge_id)
+          .first()
+          .then(userChallenge => {
+            if (userChallenge) {
+              return {
+                ...createdChallenge,
+                completed: userChallenge.completed
+              }
+            } else {
+              return {
+                ...createdChallenge
+              }
+            }
+          })
+      }))
+    })
 }
 
 //FIND ALL OF A USER'S ACCEPTED CHALLENGES
