@@ -139,6 +139,7 @@ function findUserCreatedChallenges(userId) {
       return Promise.all(createdChallenges.map(createdChallenge => {
         return db('userChallenges as uc')
           .where('uc.challenge_id', createdChallenge.challenge_id)
+          .where('uc.user_id', createdChallenge.user_id)
           .first()
           .then(userChallenge => {
             if (userChallenge) {
