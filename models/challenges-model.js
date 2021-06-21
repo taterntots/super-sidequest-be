@@ -464,7 +464,6 @@ function findUserCompletedChallengeTotal(userId) {
           .where('g.name', gameStat.game)
           .first()
           .then(game => {
-            console.log(game)
             return {
               ...gameStat,
               game_id: game.id

@@ -152,7 +152,7 @@ function signToken(user) {
   };
 
   const options = {
-    expiresIn: '24h'
+    expiresIn: '72h'
   };
   return jwt.sign(payload, jwtSecret, options);
 }
