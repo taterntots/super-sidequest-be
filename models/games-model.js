@@ -13,7 +13,7 @@ function findGameById(gameId) {
 }
 
 //FIND ALL OF A GAME'S CHALLENGES
-function findGameChallenges(gameId) {
+function findGameChallenges(gameId, userId) {
   return db('challenges as c')
     .leftOuterJoin('users as u', 'c.user_id', 'u.id')
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
@@ -43,14 +43,39 @@ function findGameChallenges(gameId) {
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id')
     .orderBy('c.created_at', 'desc')
     .then(gameChallenges => {
-      // Map through the gameChallegnes and find number of users who accepted each one
+      // Map through the gameChallenges and find number of users who accepted each one
       return Promise.all(gameChallenges.map(gameChallenge => {
         return db('userChallenges as uc')
           .where('uc.challenge_id', gameChallenge.challenge_id)
           .then(challenges => {
-            return {
-              ...gameChallenge,
-              active_users: challenges.length
+            // Map through the current users challenges to see which ones they completed, only if user is signed in
+            if (userId) {
+              return db('userChallenges as uc')
+                .where('uc.challenge_id', gameChallenge.challenge_id)
+                .where('uc.user_id', userId)
+                .first()
+                .then(userChallenge => {
+                  if (userChallenge) {
+                    // Append completed bool is userChallenge exists (true or false)
+                    return {
+                      ...gameChallenge,
+                      active_users: challenges.length,
+                      completed: userChallenge.completed
+                    }
+                  } else {
+                    // Otherwise, don't worry about the completed bool
+                    return {
+                      ...gameChallenge,
+                      active_users: challenges.length
+                    }
+                  }
+                })
+            } else {
+              // If user is not signed in, simply return without accounting for completion
+              return {
+                ...gameChallenge,
+                active_users: challenges.length
+              }
             }
           })
       }))
@@ -58,7 +83,7 @@ function findGameChallenges(gameId) {
 }
 
 //FIND ALL OF A GAME'S CHALLENGES SORTED BY POPULARITY
-function findGameChallengesByPopularity(gameId) {
+function findGameChallengesByPopularity(gameId, userId) {
   return db('challenges as c')
     .leftOuterJoin('users as u', 'c.user_id', 'u.id')
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
@@ -87,14 +112,39 @@ function findGameChallengesByPopularity(gameId) {
     ])
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id')
     .then(gameChallenges => {
-      // Map through the gameChallegnes and find number of users who accepted each one
+      // Map through the gameChallenges and find number of users who accepted each one
       return Promise.all(gameChallenges.map(gameChallenge => {
         return db('userChallenges as uc')
           .where('uc.challenge_id', gameChallenge.challenge_id)
           .then(challenges => {
-            return {
-              ...gameChallenge,
-              active_users: challenges.length
+            // Map through the current users challenges to see which ones they completed, only if user is signed in
+            if (userId) {
+              return db('userChallenges as uc')
+                .where('uc.challenge_id', gameChallenge.challenge_id)
+                .where('uc.user_id', userId)
+                .first()
+                .then(userChallenge => {
+                  if (userChallenge) {
+                    // Append completed bool is userChallenge exists (true or false)
+                    return {
+                      ...gameChallenge,
+                      active_users: challenges.length,
+                      completed: userChallenge.completed
+                    }
+                  } else {
+                    // Otherwise, don't worry about the completed bool
+                    return {
+                      ...gameChallenge,
+                      active_users: challenges.length
+                    }
+                  }
+                })
+            } else {
+              // If user is not signed in, simply return without accounting for completion
+              return {
+                ...gameChallenge,
+                active_users: challenges.length
+              }
             }
           })
       }))

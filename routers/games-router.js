@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const Games = require('../models/games-model.js')
-const { validateGameId, checkForGameData } = require('../middleware/index.js');
+const { validateGameId, validateUserId, checkForGameData } = require('../middleware/index.js');
 
 //*************** GET ALL GAMES *****************//
 router.get('/', (req, res) => {
@@ -43,7 +43,24 @@ router.get('/:gameId/challenges', validateGameId, (req, res) => {
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        error: 'There was an error getting all game challenges to display'
+        error: 'There was an error getting all game challenges for this user to display'
+      });
+    });
+});
+
+//*************** GET ALL OF A GAME'S CHALLENGES WITH COMPLETION FOR USER *****************//
+router.get('/:gameId/users/:userId/challenges', validateGameId, validateUserId, (req, res) => {
+  const { gameId } = req.params;
+  const { userId } = req.params;
+
+  Games.findGameChallenges(gameId, userId)
+    .then(challenges => {
+      res.json(challenges);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all game challenges for this user to display'
       });
     });
 });
@@ -53,6 +70,23 @@ router.get('/:gameId/challenges/popular', validateGameId, (req, res) => {
   const { gameId } = req.params;
 
   Games.findGameChallengesByPopularity(gameId)
+    .then(challenges => {
+      res.json(challenges);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all game challenges sorted by popularity to display'
+      });
+    });
+});
+
+//*************** GET ALL OF A GAME'S CHALLENGES SORTED BY POPULARITY WITH COMPLETION FOR USER *****************//
+router.get('/:gameId/users/:userId/challenges/popular', validateGameId, validateUserId, (req, res) => {
+  const { gameId } = req.params;
+  const { userId } = req.params;
+
+  Games.findGameChallengesByPopularity(gameId, userId)
     .then(challenges => {
       res.json(challenges);
     })
