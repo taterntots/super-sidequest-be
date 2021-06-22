@@ -223,12 +223,33 @@ router.put('/:challengeId/users/:userId/update', restrictedUser, validateChallen
 
   Challenges.updateUserChallengeProgress(challengeId, userId, changes)
     .then(response => {
-      res.status(200).json({ updatedUserChallengeProgress: response });
+      setTimeout(function () { // Give it some loading time
+        res.status(200).json({ updatedUserChallengeProgress: response });
+      }, 2000)
     })
     .catch(err => {
       console.log(err);
       res.status(500).json({
         errorMessage: `There was an error updating this user's challenge progress`
+      });
+    });
+});
+
+//*************** UPDATE USER CHALLENGE COMPLETED PROGRESS *****************//
+router.put('/:challengeId/users/:userId/complete', restrictedUser, validateChallengeId, validateUserId, (req, res) => {
+  const challengeId = req.params.challengeId;
+  const userId = req.params.userId;
+  var changes = req.body;
+  changes.updated_at = new Date() // rewrites updated_at timestamp to current time of update
+
+  Challenges.updateUserChallengeProgress(challengeId, userId, changes)
+    .then(response => {
+      res.status(200).json({ updatedUserChallengeProgress: response });
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        errorMessage: `There was an error updating this user's challenge completion progress`
       });
     });
 });
