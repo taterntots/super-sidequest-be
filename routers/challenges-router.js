@@ -174,7 +174,7 @@ router.get('/:challengeId/glory', restrictedAdmin, validateChallengeId, (req, re
 });
 
 //*************** REMOVE CHALLENGE FROM THE DATABASE  *****************//
-router.delete('/:challengeId', restrictedAdmin, validateChallengeId, (req, res) => {
+router.delete('/:challengeId', restrictedUser, validateChallengeId, (req, res) => {
   const challengeId = req.params.challengeId;
 
   Challenges.removeChallengeById(challengeId)
