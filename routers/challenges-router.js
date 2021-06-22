@@ -202,7 +202,9 @@ router.put('/:challengeId', restrictedUser, validateChallengeId, (req, res) => {
 
   Challenges.updateChallengeById(challengeId, changes)
     .then(response => {
-      res.status(200).json({ updatedChallenge: response });
+      setTimeout(function () { // Give it some loading time
+        res.status(200).json({ updatedChallenge: response });
+      }, 2000)
     })
     .catch(err => {
       console.log(err);
