@@ -193,7 +193,7 @@ router.delete('/:challengeId', restrictedAdmin, validateChallengeId, (req, res) 
 });
 
 //*************** UPDATE CHALLENGE *****************//
-router.put('/:challengeId', restrictedAdmin, validateChallengeId, (req, res) => {
+router.put('/:challengeId', restrictedUser, validateChallengeId, (req, res) => {
   const challengeId = req.params.challengeId;
   var changes = req.body;
   changes.updated_at = new Date() // rewrites updated_at timestamp to current time of update
