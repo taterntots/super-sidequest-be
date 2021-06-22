@@ -179,10 +179,12 @@ router.delete('/:challengeId', restrictedUser, validateChallengeId, (req, res) =
 
   Challenges.removeChallengeById(challengeId)
     .then(response => {
-      res.status(200).json({
-        success: `The challenge was successfully deleted`,
-        id: challengeId
-      });
+      setTimeout(function () { // Give it some loading time
+        res.status(200).json({
+          success: `The challenge was successfully deleted`,
+          id: challengeId
+        });
+      }, 2000)
     })
     .catch(err => {
       console.log(err);
