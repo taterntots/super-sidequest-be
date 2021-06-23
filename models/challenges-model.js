@@ -134,6 +134,7 @@ function findUserCreatedChallenges(userId) {
       'c.updated_at'
     ])
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id')
+    .orderBy('c.created_at', 'desc')
     .then(createdChallenges => {
       // Loop through created challenges, attaching a completed bool if a user has accepted a challenge
       return Promise.all(createdChallenges.map(createdChallenge => {
@@ -191,6 +192,7 @@ function findUserAcceptedChallenges(userId) {
       'c.updated_at'
     ])
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id', 'uc.id')
+    .orderBy('uc.updated_at', 'desc')
 }
 
 //FIND ALL OF A USER'S COMPLETED CHALLENGES
@@ -227,6 +229,7 @@ function findUserCompletedChallenges(userId) {
       'c.updated_at'
     ])
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id', 'uc.id')
+    .orderBy('uc.updated_at', 'desc')
 }
 
 //FIND HIGH SCORE LEADERBOARD FOR A GIVEN CHALLENGE
