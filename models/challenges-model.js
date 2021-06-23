@@ -33,7 +33,7 @@ function findChallenges() {
 }
 
 //FIND ALL RECENT CHALLENGES (LIMITED TO SIX FOR HOMEPAGE)
-function findRecentChallenges() {
+function findRecentChallenges(userId) {
   return db('challenges as c')
     .leftOuterJoin('users as u', 'c.user_id', 'u.id')
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
@@ -63,6 +63,43 @@ function findRecentChallenges() {
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id')
     .limit(6)
     .orderBy('c.created_at', 'desc')
+    .then(recentChallenges => {
+      // Loop through recent challenges, finding active users and attaching a completed bool if a user has accepted a challenge
+      return Promise.all(recentChallenges.map(recentChallenge => {
+        return db('userChallenges as uc')
+          .where('uc.challenge_id', recentChallenge.challenge_id)
+          .then(userChallenges => {
+            if (userId) {
+              return db('userChallenges as uc')
+                .where('uc.challenge_id', recentChallenge.challenge_id)
+                .where('uc.user_id', userId)
+                .first()
+                .then(userChallenge => {
+                  if (userChallenge) {
+                    // Append completed bool is userChallenge exists (true or false)
+                    return {
+                      ...recentChallenge,
+                      active_users: userChallenges.length,
+                      completed: userChallenge.completed
+                    }
+                  } else {
+                    // Otherwise, don't worry about the completed bool
+                    return {
+                      ...recentChallenge,
+                      active_users: userChallenges.length
+                    }
+                  }
+                })
+            } else {
+              // If user is not signed in, simply return without accounting for completion
+              return {
+                ...gameChallenge,
+                active_users: userChallenges.length
+              }
+            }
+          })
+      }))
+    })
 }
 
 //FIND CHALLENGE BY ID
@@ -136,23 +173,29 @@ function findUserCreatedChallenges(userId) {
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id')
     .orderBy('c.created_at', 'desc')
     .then(createdChallenges => {
-      // Loop through created challenges, attaching a completed bool if a user has accepted a challenge
+      // Loop through created challenges, finding active users and attaching a completed bool if a user has accepted a challenge
       return Promise.all(createdChallenges.map(createdChallenge => {
         return db('userChallenges as uc')
           .where('uc.challenge_id', createdChallenge.challenge_id)
-          .where('uc.user_id', createdChallenge.user_id)
-          .first()
-          .then(userChallenge => {
-            if (userChallenge) {
-              return {
-                ...createdChallenge,
-                completed: userChallenge.completed
-              }
-            } else {
-              return {
-                ...createdChallenge
-              }
-            }
+          .then(userChallenges => {
+            return db('userChallenges as uc')
+              .where('uc.challenge_id', createdChallenge.challenge_id)
+              .where('uc.user_id', createdChallenge.user_id)
+              .first()
+              .then(userChallenge => {
+                if (userChallenge) {
+                  return {
+                    ...createdChallenge,
+                    active_users: userChallenges.length,
+                    completed: userChallenge.completed
+                  }
+                } else {
+                  return {
+                    ...createdChallenge,
+                    active_users: userChallenges.length
+                  }
+                }
+              })
           })
       }))
     })
@@ -193,6 +236,19 @@ function findUserAcceptedChallenges(userId) {
     ])
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id', 'uc.id')
     .orderBy('uc.updated_at', 'desc')
+    .then(acceptedChallenges => {
+      // Loop through accepted challenges, finding active users and attaching a completed bool if a user has accepted a challenge
+      return Promise.all(acceptedChallenges.map(acceptedChallenge => {
+        return db('userChallenges as uc')
+          .where('uc.challenge_id', acceptedChallenge.challenge_id)
+          .then(userChallenges => {
+            return {
+              ...acceptedChallenge,
+              active_users: userChallenges.length
+            }
+          })
+      }))
+    })
 }
 
 //FIND ALL OF A USER'S COMPLETED CHALLENGES
@@ -230,6 +286,19 @@ function findUserCompletedChallenges(userId) {
     ])
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id', 'uc.id')
     .orderBy('uc.updated_at', 'desc')
+    .then(completedChallenges => {
+      // Loop through completed challenges, finding active users and attaching a completed bool if a user has accepted a challenge
+      return Promise.all(completedChallenges.map(completedChallenge => {
+        return db('userChallenges as uc')
+          .where('uc.challenge_id', completedChallenge.challenge_id)
+          .then(userChallenges => {
+            return {
+              ...completedChallenge,
+              active_users: userChallenges.length
+            }
+          })
+      }))
+    })
 }
 
 //FIND HIGH SCORE LEADERBOARD FOR A GIVEN CHALLENGE

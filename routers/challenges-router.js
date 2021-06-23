@@ -25,8 +25,10 @@ router.get('/', restrictedAdmin, (req, res) => {
 });
 
 //*************** GET ALL RECENT CHALLENGES (LIMITED) *****************//
-router.get('/recent', restrictedAdmin, (req, res) => {
-  Challenges.findRecentChallenges()
+router.get('/recent/users/:userId', restrictedAdmin, (req, res) => {
+  const { userId } = req.params;
+
+  Challenges.findRecentChallenges(userId)
     .then(challenges => {
       res.json(challenges);
     })
