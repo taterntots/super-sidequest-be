@@ -77,7 +77,9 @@ router.patch('/forgot-password', async (req, res) => {
       await Users.updateUserById(user.id, { reset_link });
       // We'll define this function below
       sendEmail(user, reset_link);
-      res.status(200).json({ message: "Request sent! Please check your email" });
+      setTimeout(function () { // Give it some loading time
+        res.status(200).json({ message: "Request sent! Please check your email" });
+      }, 2000)
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -116,7 +118,10 @@ router.patch('/reset-password/:token', async (req, res) => {
       reset_link: null
     }
     await Users.updateUserById(user.id, updatedCredentials);
-    res.status(200).json({ message: 'Password updated' });
+    setTimeout(function () { // Give it some loading time
+      res.status(200).json({ message: 'Password updated' });
+    }, 2000)
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
