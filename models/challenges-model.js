@@ -93,7 +93,7 @@ function findRecentChallenges(userId) {
             } else {
               // If user is not signed in, simply return without accounting for completion
               return {
-                ...gameChallenge,
+                ...recentChallenge,
                 active_users: userChallenges.length
               }
             }

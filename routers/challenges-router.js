@@ -25,6 +25,20 @@ router.get('/', restrictedAdmin, (req, res) => {
 });
 
 //*************** GET ALL RECENT CHALLENGES (LIMITED) *****************//
+router.get('/recent', restrictedAdmin, (req, res) => {
+  Challenges.findRecentChallenges()
+    .then(challenges => {
+      res.json(challenges);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all recent challenges to display'
+      });
+    });
+});
+
+//*************** GET ALL RECENT CHALLENGES (LIMITED) WITH COMPLETION FOR USER *****************//
 router.get('/recent/users/:userId', restrictedAdmin, (req, res) => {
   const { userId } = req.params;
 
@@ -35,7 +49,7 @@ router.get('/recent/users/:userId', restrictedAdmin, (req, res) => {
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        error: 'There was an error getting all recent challenges to display'
+        error: 'There was an error getting all recent challenges with completion data for users to display'
       });
     });
 });
