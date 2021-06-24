@@ -1,10 +1,10 @@
 const router = require('express').Router();
 const Users = require('../models/users-model.js')
 const Challenges = require('../models/challenges-model.js')
-const { validateUserId, validateUsername, checkForUserData } = require('../middleware/index.js');
+const { validateUserId, validateUsername, checkForUserData, restrictedUser, restrictedAdmin } = require('../middleware/index.js');
 
 //*************** GET ALL USERS *****************//
-router.get('/', (req, res) => {
+router.get('/', restrictedAdmin, (req, res) => {
   Users.findUsers()
     .then(users => {
       res.json(users);
@@ -18,7 +18,7 @@ router.get('/', (req, res) => {
 });
 
 //*************** GET USER BY ID *****************//
-router.get('/:userId', validateUserId, (req, res) => {
+router.get('/:userId', validateUserId, restrictedAdmin, (req, res) => {
   const { userId } = req.params;
 
   Users.findUserById(userId)
@@ -34,7 +34,7 @@ router.get('/:userId', validateUserId, (req, res) => {
 });
 
 //*************** GET USER BY USERNAME *****************//
-router.get('/username/:username', validateUsername, (req, res) => {
+router.get('/username/:username', validateUsername, restrictedAdmin, (req, res) => {
   const { username } = req.params;
 
   Users.findUserByUsername(username)
@@ -50,7 +50,7 @@ router.get('/username/:username', validateUsername, (req, res) => {
 });
 
 //*************** GET ALL OF A USER'S CREATED CHALLENGES *****************//
-router.get('/:userId/created-challenges', validateUserId, (req, res) => {
+router.get('/:userId/created-challenges', validateUserId, restrictedAdmin, (req, res) => {
   const { userId } = req.params;
 
   Challenges.findUserCreatedChallenges(userId)
@@ -66,7 +66,7 @@ router.get('/:userId/created-challenges', validateUserId, (req, res) => {
 });
 
 //*************** GET ALL OF A USER'S ACCEPTED CHALLENGES *****************//
-router.get('/:userId/accepted-challenges', validateUserId, (req, res) => {
+router.get('/:userId/accepted-challenges', validateUserId, restrictedAdmin, (req, res) => {
   const { userId } = req.params;
 
   Challenges.findUserAcceptedChallenges(userId)
@@ -82,7 +82,7 @@ router.get('/:userId/accepted-challenges', validateUserId, (req, res) => {
 });
 
 //*************** GET ALL OF A USER'S COMPLETED CHALLENGES *****************//
-router.get('/:userId/completed-challenges', validateUserId, (req, res) => {
+router.get('/:userId/completed-challenges', validateUserId, restrictedAdmin, (req, res) => {
   const { userId } = req.params;
 
   Challenges.findUserCompletedChallenges(userId)
@@ -98,7 +98,7 @@ router.get('/:userId/completed-challenges', validateUserId, (req, res) => {
 });
 
 //*************** GET A USER'S COMPLETED CHALLENGE TOTAL FOR ALL GAMES *****************//
-router.get('/:userId/games/stats', validateUserId, (req, res) => {
+router.get('/:userId/games/stats', validateUserId, restrictedAdmin, (req, res) => {
   const { userId } = req.params;
 
   Challenges.findUserCompletedChallengeTotal(userId)
@@ -114,7 +114,7 @@ router.get('/:userId/games/stats', validateUserId, (req, res) => {
 });
 
 //*************** FIND A USER'S FEATURED CHALLENGE *****************//
-router.get('/:userId/challenges/featured', validateUserId, (req, res) => {
+router.get('/:userId/challenges/featured', validateUserId, restrictedAdmin, (req, res) => {
   const { userId } = req.params;
 
   Challenges.findUserFeaturedChallenge(userId)
@@ -130,7 +130,7 @@ router.get('/:userId/challenges/featured', validateUserId, (req, res) => {
 });
 
 //*************** ADD NEW USER TO THE DATABASE *****************//
-router.post('/', checkForUserData, (req, res) => {
+router.post('/', checkForUserData, restrictedAdmin, (req, res) => {
   let user = req.body;
 
   Users.addUser(user)
@@ -145,8 +145,8 @@ router.post('/', checkForUserData, (req, res) => {
     });
 });
 
-//*************** REMOVE USER FROM THE DATABASE  *****************//
-router.delete('/:userId', validateUserId, (req, res) => {
+//*************** REMOVE USER FROM THE DATABASE *****************//
+router.delete('/:userId', validateUserId, restrictedAdmin, (req, res) => {
   const userId = req.params.userId;
 
   Users.removeUserById(userId)
@@ -165,14 +165,16 @@ router.delete('/:userId', validateUserId, (req, res) => {
 });
 
 //*************** UPDATE USER *****************//
-router.put('/:userId', validateUserId, (req, res) => {
+router.put('/:userId', validateUserId, restrictedUser, (req, res) => {
   const userId = req.params.userId;
   var changes = req.body;
   changes.updated_at = new Date() // rewrites updated_at timestamp to current time of update
 
   Users.updateUserById(userId, changes)
     .then(response => {
-      res.status(200).json({ updatedUser: response });
+      setTimeout(function () { // Give it some loading time
+        res.status(200).json({ updatedUser: response });
+      }, 2000)
     })
     .catch(err => {
       console.log(err);
