@@ -117,6 +117,8 @@ function findChallengeById(challengeId) {
       'c.description',
       'u.username',
       'c.user_id',
+      'u.profile_color_one',
+      'u.profile_color_two',
       'g.name as game_title',
       'g.banner_pic_URL',
       's.name as system',
