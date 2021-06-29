@@ -33,7 +33,7 @@ server.get('/', (req, res) => {
 // Routes
 server.use('/api/auth', authRouter);
 server.use('/api/users', usersRouter);
-server.use('/api/games', restrictedAdmin, gamesRouter);
+server.use('/api/games', gamesRouter);
 server.use('/api/systems', restrictedAdmin, systemsRouter);
 server.use('/api/difficulty', restrictedAdmin, difficultyRouter);
 server.use('/api/challenges', challengesRouter);

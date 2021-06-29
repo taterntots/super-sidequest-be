@@ -1,9 +1,9 @@
 const router = require('express').Router();
 const Games = require('../models/games-model.js')
-const { validateGameId, validateUserId, checkForGameData } = require('../middleware/index.js');
+const { validateGameId, validateUserId, checkForGameData, restrictedUser, restrictedAdmin } = require('../middleware/index.js');
 
 //*************** GET ALL GAMES *****************//
-router.get('/', (req, res) => {
+router.get('/', restrictedAdmin, (req, res) => {
   Games.findGames()
     .then(games => {
       res.json(games);
@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
 });
 
 //*************** GET GAME BY ID *****************//
-router.get('/:gameId', validateGameId, (req, res) => {
+router.get('/:gameId', validateGameId, restrictedAdmin, (req, res) => {
   const { gameId } = req.params;
 
   Games.findGameById(gameId)
@@ -33,7 +33,7 @@ router.get('/:gameId', validateGameId, (req, res) => {
 });
 
 //*************** GET ALL OF A GAME'S CHALLENGES *****************//
-router.get('/:gameId/challenges', validateGameId, (req, res) => {
+router.get('/:gameId/challenges', validateGameId, restrictedAdmin, (req, res) => {
   const { gameId } = req.params;
 
   Games.findGameChallenges(gameId)
@@ -49,7 +49,7 @@ router.get('/:gameId/challenges', validateGameId, (req, res) => {
 });
 
 //*************** GET ALL OF A GAME'S CHALLENGES WITH COMPLETION FOR USER *****************//
-router.get('/:gameId/users/:userId/challenges', validateGameId, validateUserId, (req, res) => {
+router.get('/:gameId/users/:userId/challenges', validateGameId, validateUserId, restrictedAdmin, (req, res) => {
   const { gameId } = req.params;
   const { userId } = req.params;
 
@@ -66,7 +66,7 @@ router.get('/:gameId/users/:userId/challenges', validateGameId, validateUserId, 
 });
 
 //*************** GET ALL OF A GAME'S CHALLENGES SORTED BY POPULARITY *****************//
-router.get('/:gameId/challenges/popular', validateGameId, (req, res) => {
+router.get('/:gameId/challenges/popular', validateGameId, restrictedAdmin, (req, res) => {
   const { gameId } = req.params;
 
   Games.findGameChallengesByPopularity(gameId)
@@ -82,7 +82,7 @@ router.get('/:gameId/challenges/popular', validateGameId, (req, res) => {
 });
 
 //*************** GET ALL OF A GAME'S CHALLENGES SORTED BY POPULARITY WITH COMPLETION FOR USER *****************//
-router.get('/:gameId/users/:userId/challenges/popular', validateGameId, validateUserId, (req, res) => {
+router.get('/:gameId/users/:userId/challenges/popular', validateGameId, validateUserId, restrictedAdmin, (req, res) => {
   const { gameId } = req.params;
   const { userId } = req.params;
 
@@ -99,7 +99,7 @@ router.get('/:gameId/users/:userId/challenges/popular', validateGameId, validate
 });
 
 //*************** ADD NEW GAME TO THE DATABASE *****************//
-router.post('/', checkForGameData, (req, res) => {
+router.post('/', checkForGameData, restrictedUser, (req, res) => {
   let game = req.body;
 
   Games.addGame(game)
@@ -115,7 +115,7 @@ router.post('/', checkForGameData, (req, res) => {
 });
 
 //*************** REMOVE GAME FROM THE DATABASE  *****************//
-router.delete('/:gameId', validateGameId, (req, res) => {
+router.delete('/:gameId', validateGameId, restrictedAdmin, (req, res) => {
   const gameId = req.params.gameId;
 
   Games.removeGameById(gameId)
@@ -134,7 +134,7 @@ router.delete('/:gameId', validateGameId, (req, res) => {
 });
 
 //*************** UPDATE GAME *****************//
-router.put('/:gameId', validateGameId, (req, res) => {
+router.put('/:gameId', validateGameId, restrictedAdmin, (req, res) => {
   const gameId = req.params.gameId;
   var changes = req.body;
   changes.updated_at = new Date() // rewrites updated_at timestamp to current time of update
