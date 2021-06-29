@@ -118,7 +118,9 @@ router.post('/', checkForGameData, restrictedUser, (req, res) => {
 
   Games.addGame(game)
     .then(response => {
-      res.status(201).json(response);
+      setTimeout(function () { // Give it some loading time
+        res.status(201).json(response);
+      }, 2000)
     })
     .catch(err => {
       console.log(err);

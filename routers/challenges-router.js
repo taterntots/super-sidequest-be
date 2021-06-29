@@ -79,7 +79,6 @@ router.post('/', restrictedUser, checkForChallengeData, (req, res) => {
       setTimeout(function () { // Give it some loading time
         res.status(201).json(response);
       }, 2000)
-
     })
     .catch(err => {
       console.log(err);
