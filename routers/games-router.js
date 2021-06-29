@@ -150,14 +150,16 @@ router.delete('/:gameId', validateGameId, restrictedAdmin, (req, res) => {
 });
 
 //*************** UPDATE GAME *****************//
-router.put('/:gameId', validateGameId, restrictedAdmin, (req, res) => {
+router.put('/:gameId', validateGameId, restrictedUser, (req, res) => {
   const gameId = req.params.gameId;
   var changes = req.body;
   changes.updated_at = new Date() // rewrites updated_at timestamp to current time of update
 
   Games.updateGameById(gameId, changes)
     .then(response => {
-      res.status(200).json({ updatedGame: response });
+      setTimeout(function () { // Give it some loading time
+        res.status(200).json({ updatedGame: response });
+      }, 2000)
     })
     .catch(err => {
       console.log(err);
