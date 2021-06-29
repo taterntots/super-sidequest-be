@@ -1,9 +1,17 @@
 const db = require('../data/dbConfig.js');
 
-//FIND ALL GAMES
-function findGames() {
+//FIND ALL PUBLIC GAMES
+function findPublicGames() {
   return db('games as g')
-  .orderBy('g.name', 'asc')
+    .where('g.public', true)
+    .orderBy('g.name', 'asc')
+}
+
+//FIND ALL PRIVATE GAMES
+function findPrivateGames() {
+  return db('games as g')
+    .where('g.public', false)
+    .orderBy('g.name', 'asc')
 }
 
 //FIND GAME BY ID
@@ -204,7 +212,8 @@ function findIfGameExists(gameName) {
 }
 
 module.exports = {
-  findGames,
+  findPublicGames,
+  findPrivateGames,
   findGameById,
   findGameChallenges,
   findGameChallengesByPopularity,

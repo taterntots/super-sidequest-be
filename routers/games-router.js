@@ -2,9 +2,23 @@ const router = require('express').Router();
 const Games = require('../models/games-model.js')
 const { validateGameId, validateUserId, checkForGameData, restrictedUser, restrictedAdmin } = require('../middleware/index.js');
 
-//*************** GET ALL GAMES *****************//
-router.get('/', restrictedAdmin, (req, res) => {
-  Games.findGames()
+//*************** GET ALL PUBLIC GAMES *****************//
+router.get('/public', restrictedAdmin, (req, res) => {
+  Games.findPublicGames()
+    .then(games => {
+      res.json(games);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all games to display'
+      });
+    });
+});
+
+//*************** GET ALL PRIVATE GAMES *****************//
+router.get('/private', restrictedAdmin, (req, res) => {
+  Games.findPrivateGames()
     .then(games => {
       res.json(games);
     })
