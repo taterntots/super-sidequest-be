@@ -49,6 +49,22 @@ router.get('/username/:username', validateUsername, restrictedAdmin, (req, res) 
     });
 });
 
+//*************** FIND IF USER IS AN ADMIN *****************//
+router.get('/:userId/is-admin', validateUserId, restrictedAdmin, (req, res) => {
+  const { userId } = req.params;
+
+  Users.findUserAdminStatus(userId)
+    .then(userStatus => {
+      res.json(userStatus);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error validating admin status for this user'
+      });
+    });
+});
+
 //*************** GET ALL OF A USER'S CREATED CHALLENGES *****************//
 router.get('/:userId/created-challenges', validateUserId, restrictedAdmin, (req, res) => {
   const { userId } = req.params;

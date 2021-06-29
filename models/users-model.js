@@ -19,6 +19,20 @@ function findUserByUsername(username) {
     .first()
 }
 
+//FIND IF USER IS AN ADMIN
+function findUserAdminStatus(userId) {
+  return db('users as u')
+    .where('u.id', userId)
+    .first()
+    .then(user => {
+      if (user.is_admin) {
+        return true
+      } else {
+        return false
+      }
+    })
+}
+
 //FIND USERS BY A SPECIFIC FILTER (NEEDED FOR VALIDATION MIDDLEWARE)
 function findUsersBy(filter) {
   return db('users')
@@ -83,6 +97,7 @@ module.exports = {
   findUsers,
   findUserById,
   findUserByUsername,
+  findUserAdminStatus,
   findUsersBy,
   addUser,
   removeUserById,
