@@ -2,7 +2,8 @@ const db = require('../data/dbConfig.js');
 
 //FIND ALL GAMES
 function findGames() {
-  return db('games')
+  return db('games as g')
+  .orderBy('g.name', 'asc')
 }
 
 //FIND GAME BY ID
