@@ -137,9 +137,10 @@ router.patch('/contact-email', async (req, res) => {
     sgMail.setApiKey(sendGridKey);
     const msg = {
       to: "taterntots.twitch@gmail.com",
-      from: email,
+      from: "matthew.a.weidner@gmail.com",
       subject: subject,
       html: `
+      <h1>${email}</h1>
        <p>${message}</p>
      `
     };
