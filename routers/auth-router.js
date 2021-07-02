@@ -76,7 +76,7 @@ router.patch('/forgot-password', async (req, res) => {
       // Update reset_link property to be the temporary token and then send email
       await Users.updateUserById(user.id, { reset_link });
       // We'll define this function below
-      sendEmail(user, reset_link);
+      sendPasswordEmail(user, reset_link);
       setTimeout(function () { // Give it some loading time
         res.status(200).json({ message: "Request sent! Please check your email" });
       }, 2000)
@@ -127,9 +127,38 @@ router.patch('/reset-password/:token', async (req, res) => {
   }
 })
 
-//************************* SEND EMAIL FUNCTION *****************************//
+//*************** SEND CONTACT EMAIL *****************//
 
-function sendEmail(user, token) {
+router.patch('/contact-email', async (req, res) => {
+  const { email, subject, message } = req.body;
+
+  try {
+    // Send email to my account
+    sgMail.setApiKey(sendGridKey);
+    const msg = {
+      to: "taterntots.twitch@gmail.com",
+      from: email,
+      subject: subject,
+      html: `
+       <p>${message}</p>
+     `
+    };
+    await sgMail.send(msg)
+      .then(() => {
+        setTimeout(function () { // Give it some loading time
+          res.status(200).json({ message: 'Message sent! We will get back to you as soon as we can.' });
+        }, 2000)
+      }).catch(() => {
+        res.status(500).json({ message: 'There was a problem sending your message.' });
+      })
+  } catch (error) {
+    res.status(500).json({ message: 'Bad news bears. Something is wrong with this endpoint.' });
+  }
+})
+
+//************************* SEND EMAIL FUNCTIONS *****************************//
+
+function sendPasswordEmail(user, token) {
   sgMail.setApiKey(sendGridKey);
   const msg = {
     to: user.email,
@@ -143,7 +172,7 @@ function sendEmail(user, token) {
     .then(() => {
       console.log("Email sent");
     }).catch((error) => {
-      console.error(error);
+      console.error("Email failed to send");
     })
 }
 
