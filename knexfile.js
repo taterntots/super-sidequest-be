@@ -38,14 +38,14 @@ module.exports = {
       directory: './data/seeds'
     },
     pool: {
-			min: 2,
-			max: 10
-		}
+      min: 2,
+      max: 10
+    }
   },
 
   production: {
     client: 'pg',
-    connection: process.env.DATABASE_URL,
+    connection: { connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } },
     migrations: {
       directory: './data/migrations'
     },
