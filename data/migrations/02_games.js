@@ -17,6 +17,9 @@ exports.up = function (knex) {
       tbl
         .text('game_pic_URL');
       tbl
+        .boolean('public')
+        .defaultTo(true);
+      tbl
         .timestamp('created_at')
         .notNullable()
         .defaultTo(knex.raw('now()'));

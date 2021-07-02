@@ -7,7 +7,7 @@ exports.up = function (knex) {
         .notNullable()
         .defaultTo(knex.raw('uuid_generate_v4()'));
       tbl
-        .text('name', 100)
+        .text('name')
         .notNullable();
       tbl
         .uuid('game_id')
@@ -18,7 +18,7 @@ exports.up = function (knex) {
         .onUpdate('CASCADE')
         .onDelete('CASCADE');
       tbl
-        .text('description', 140);
+        .text('description');
       tbl
         .uuid('user_id')
         .unsigned()
@@ -44,8 +44,7 @@ exports.up = function (knex) {
         .onUpdate('CASCADE')
         .onDelete('CASCADE');
       tbl
-        .text('rules')
-        .notNullable();
+        .text('rules');
       tbl
         .boolean('is_high_score')
         .defaultTo(false);
@@ -56,7 +55,7 @@ exports.up = function (knex) {
         .boolean('featured')
         .defaultTo(false);
       tbl
-        .text('prize', 100)
+        .text('prize')
       tbl
         .datetime('start_date');
       tbl

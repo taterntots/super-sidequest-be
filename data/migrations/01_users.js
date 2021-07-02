@@ -7,7 +7,7 @@ exports.up = function (knex) {
         .notNullable()
         .defaultTo(knex.raw('uuid_generate_v4()'));
       tbl
-        .text('username', 15)
+        .text('username')
         .unique()
         .notNullable();
       tbl
@@ -21,6 +21,15 @@ exports.up = function (knex) {
         .text('reset_link')
       tbl
         .text('profile_pic_URL');
+      tbl
+        .text('banner_pic_URL');
+      tbl
+        .text('profile_color_one');
+      tbl
+        .text('profile_color_two');
+      tbl
+        .boolean('is_admin')
+        .defaultTo(false);
       tbl
         .timestamp('created_at')
         .notNullable()

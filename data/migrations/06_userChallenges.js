@@ -26,6 +26,9 @@ exports.up = function (knex) {
         .boolean('completed')
         .defaultTo(false);
       tbl
+        .boolean('is_active')
+        .defaultTo(true);
+      tbl
         .integer('high_score');
       tbl
         .integer('speedrun_hours');
@@ -35,6 +38,8 @@ exports.up = function (knex) {
         .integer('speedrun_seconds');
       tbl
         .integer('speedrun_milliseconds');
+      tbl
+        .integer('total_milliseconds');
       tbl
         .text('notes');
       tbl
