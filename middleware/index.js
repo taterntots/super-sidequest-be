@@ -311,11 +311,10 @@ function checkForChallengeData(req, res, next) {
     !req.body.game_id ||
     !req.body.user_id ||
     !req.body.system_id ||
-    !req.body.difficulty_id ||
-    !req.body.rules
+    !req.body.difficulty_id
   ) {
     res.status(400).json({
-      errorMessage: 'name, game_id, user_id, system_id, difficulty_id, and rules are required fields'
+      errorMessage: 'name, game_id, user_id, system_id, and difficulty_id are required fields'
     });
   } else {
     next();
