@@ -123,6 +123,7 @@ function findChallengeById(challengeId) {
       'g.banner_pic_URL',
       's.name as system',
       'd.name as difficulty',
+      'd.id as difficulty_id',
       'd.points',
       'c.rules',
       'c.is_high_score',
