@@ -402,12 +402,18 @@ function findUserFeaturedChallenge(userId) {
     })
 }
 
-//ADD A CHALLENGE TO THE DATABASE
+//ADD A CHALLENGE TO THE DATABASE AND ALSO ACCEPT IT
 function addChallenge(challenge) {
   return db('challenges')
     .insert(challenge, 'id')
     .then(([id]) => {
-      return findChallengeById(id);
+      return findChallengeById(id)
+        .then(challenge => {
+          return acceptChallenge(challenge.user_id, challenge.challenge_id)
+            .then(acceptedChallenge => {
+              return findChallengeById(id)
+            })
+        })
     });
 }
 
