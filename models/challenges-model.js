@@ -122,6 +122,7 @@ function findChallengeById(challengeId) {
       'g.name as game_title',
       'g.banner_pic_URL',
       's.name as system',
+      's.id as system_id',
       'd.name as difficulty',
       'd.id as difficulty_id',
       'd.points',
