@@ -131,15 +131,17 @@ router.post('/', checkForGameData, restrictedUser, (req, res) => {
 });
 
 //*************** REMOVE GAME FROM THE DATABASE  *****************//
-router.delete('/:gameId', validateGameId, restrictedAdmin, (req, res) => {
+router.delete('/:gameId', validateGameId, restrictedUser, (req, res) => {
   const gameId = req.params.gameId;
 
   Games.removeGameById(gameId)
     .then(response => {
-      res.status(200).json({
-        success: `The game was successfully deleted`,
-        id: gameId
-      });
+      setTimeout(function () { // Give it some loading time
+        res.status(200).json({
+          success: `The game was successfully deleted`,
+          id: gameId
+        });
+      }, 2000)
     })
     .catch(err => {
       console.log(err);
