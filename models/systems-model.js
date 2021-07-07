@@ -3,12 +3,29 @@ const db = require('../data/dbConfig.js');
 //FIND ALL SYSTEMS
 function findSystems() {
   return db('systems')
+    .whereNot('name', 'Any')
+    .orderBy('name', 'asc')
+    .then(systems => {
+      return findSystemByName('Any').then(anySystem => {
+        if (anySystem) {
+          systems.unshift(anySystem)
+        }
+        return systems
+      })
+    })
 }
 
 //FIND SYSTEM BY ID
 function findSystemById(systemId) {
   return db('systems as s')
     .where('s.id', systemId)
+    .first()
+}
+
+//FIND SYSTEM BY NAME
+function findSystemByName(systemName) {
+  return db('systems as s')
+    .where('s.name', systemName)
     .first()
 }
 
