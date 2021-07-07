@@ -468,6 +468,7 @@ function updateUserFeaturedChallenge(challengeId, changes) {
     return db('challenges as c')
       // REMOVE FEATURE STATUS FROM PREVIOUSLY FEATURED CHALLENGE. USER ONLY GETS ONE AT A TIME
       .where('c.featured', true)
+      .where('c.id', challengeId)
       .update({ featured: false, updated_at: new Date() })
       .then(res => {
         return findChallengeById(challengeId);
@@ -476,6 +477,7 @@ function updateUserFeaturedChallenge(challengeId, changes) {
     return db('challenges as c')
       // REMOVE FEATURE STATUS FROM PREVIOUSLY FEATURED CHALLENGE. USER ONLY GETS ONE AT A TIME
       .where('c.featured', true)
+      .where('c.id', challengeId)
       .update({ featured: false, updated_at: new Date() })
       .then(res => {
         // UPDATE NEW CHALLENGE WITH FEATURED STATUS
