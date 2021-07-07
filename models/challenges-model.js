@@ -463,10 +463,10 @@ function updateUserChallengeProgress(challengeId, userId, changes) {
 }
 
 //UPDATE USER'S FEATURED CHALLENGE
-function updateUserFeaturedChallenge(challengeId, changes) {
+function updateUserFeaturedChallenge(challengeId, userId, changes) {
   if (!changes.featured) {
     return db('challenges as c')
-      // REMOVE FEATURE STATUS FROM PREVIOUSLY FEATURED CHALLENGE. USER ONLY GETS ONE AT A TIME
+      // REMOVE FEATURE STATUS
       .where('c.featured', true)
       .where('c.id', challengeId)
       .update({ featured: false, updated_at: new Date() })
@@ -477,7 +477,7 @@ function updateUserFeaturedChallenge(challengeId, changes) {
     return db('challenges as c')
       // REMOVE FEATURE STATUS FROM PREVIOUSLY FEATURED CHALLENGE. USER ONLY GETS ONE AT A TIME
       .where('c.featured', true)
-      .where('c.id', challengeId)
+      .where('c.user_id', userId)
       .update({ featured: false, updated_at: new Date() })
       .then(res => {
         // UPDATE NEW CHALLENGE WITH FEATURED STATUS

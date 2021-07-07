@@ -273,11 +273,12 @@ router.put('/:challengeId/users/:userId/complete', restrictedUser, validateChall
 });
 
 //*************** UPDATE A USER'S FEATURED CHALLENGE *****************//
-router.put('/:challengeId/featured', restrictedUser, validateChallengeId, (req, res) => {
+router.put('/:challengeId/users/:userId/featured', restrictedUser, validateChallengeId, (req, res) => {
   const challengeId = req.params.challengeId;
+  const userId = req.params.userId;
   var changes = req.body;
 
-  Challenges.updateUserFeaturedChallenge(challengeId, changes)
+  Challenges.updateUserFeaturedChallenge(challengeId, userId, changes)
     .then(response => {
       res.status(200).json({ updatedUserFeaturedChallenge: response });
     })
