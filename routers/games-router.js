@@ -46,24 +46,8 @@ router.get('/:gameId', validateGameId, restrictedAdmin, (req, res) => {
     });
 });
 
-//*************** GET ALL OF A GAME'S CHALLENGES *****************//
-router.get('/:gameId/challenges', validateGameId, restrictedAdmin, (req, res) => {
-  const { gameId } = req.params;
-
-  Games.findGameChallenges(gameId)
-    .then(challenges => {
-      res.json(challenges);
-    })
-    .catch(err => {
-      console.log(err);
-      res.status(500).json({
-        error: 'There was an error getting all game challenges for this user to display'
-      });
-    });
-});
-
-//*************** GET ALL OF A GAME'S CHALLENGES WITH COMPLETION FOR USER *****************//
-router.get('/:gameId/users/:userId/challenges', validateGameId, validateUserId, restrictedAdmin, (req, res) => {
+//*************** GET ALL OF A GAME'S CHALLENGES (WITH COMPLETION FOR USER IF AVAILABLE) *****************//
+router.get('/:gameId/challenges/users/:userId', validateGameId, validateUserId, restrictedAdmin, (req, res) => {
   const { gameId } = req.params;
   const { userId } = req.params;
 
@@ -79,24 +63,8 @@ router.get('/:gameId/users/:userId/challenges', validateGameId, validateUserId, 
     });
 });
 
-//*************** GET ALL OF A GAME'S CHALLENGES SORTED BY POPULARITY *****************//
-router.get('/:gameId/challenges/popular', validateGameId, restrictedAdmin, (req, res) => {
-  const { gameId } = req.params;
-
-  Games.findGameChallengesByPopularity(gameId)
-    .then(challenges => {
-      res.json(challenges);
-    })
-    .catch(err => {
-      console.log(err);
-      res.status(500).json({
-        error: 'There was an error getting all game challenges sorted by popularity to display'
-      });
-    });
-});
-
-//*************** GET ALL OF A GAME'S CHALLENGES SORTED BY POPULARITY WITH COMPLETION FOR USER *****************//
-router.get('/:gameId/users/:userId/challenges/popular', validateGameId, validateUserId, restrictedAdmin, (req, res) => {
+//*************** GET ALL OF A GAME'S CHALLENGES SORTED BY POPULARITY (WITH COMPLETION FOR USER IF AVAILABLE) *****************//
+router.get('/:gameId/challenges/popular/users/:userId', validateGameId, validateUserId, restrictedAdmin, (req, res) => {
   const { gameId } = req.params;
   const { userId } = req.params;
 

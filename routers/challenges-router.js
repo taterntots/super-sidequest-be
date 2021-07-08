@@ -11,7 +11,7 @@ const {
 } = require('../middleware/index.js');
 
 //*************** GET ALL CHALLENGES (WITH COMPLETION FOR USER IF AVAILABLE) *****************//
-router.get('/users/:userId', restrictedAdmin, (req, res) => {
+router.get('/users/:userId', restrictedAdmin, validateUserId, (req, res) => {
   const { userId } = req.params;
 
   Challenges.findChallenges(userId)
@@ -27,7 +27,7 @@ router.get('/users/:userId', restrictedAdmin, (req, res) => {
 });
 
 //*************** GET ALL RECENT CHALLENGES (LIMITED) (WITH COMPLETION FOR USER IF AVAILABLE) *****************//
-router.get('/recent/users/:userId', restrictedAdmin, (req, res) => {
+router.get('/recent/users/:userId', restrictedAdmin, validateUserId, (req, res) => {
   const { userId } = req.params;
 
   Challenges.findRecentChallenges(userId)
@@ -43,7 +43,7 @@ router.get('/recent/users/:userId', restrictedAdmin, (req, res) => {
 });
 
 //*************** GET ALL POPULAR CHALLENGES (WITH COMPLETION FOR USER IF AVAILABLE) *****************//
-router.get('/popular/users/:userId', restrictedAdmin, (req, res) => {
+router.get('/popular/users/:userId', restrictedAdmin, validateUserId, (req, res) => {
   const { userId } = req.params;
 
   Challenges.findAllChallengesByPopularity(userId)

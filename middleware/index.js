@@ -47,22 +47,27 @@ function validateUserId(req, res, next) {
   const { userId } = req.params;
   id = userId
 
-  Users.findUsersBy({ id })
-    .then(user => {
-      if (user.length > 0) {
-        next();
-      } else {
-        res.status(404).json({
-          errorMessage: 'The user with the specified ID does not exist'
+  // Some endpoints do not require a user ID if specifically set to no-user, but I still want form validation for the rest
+  if (userId !== 'no-user') {
+    Users.findUsersBy({ id })
+      .then(user => {
+        if (user.length > 0) {
+          next();
+        } else {
+          res.status(404).json({
+            errorMessage: 'The user with the specified ID does not exist'
+          });
+        }
+      })
+      .catch(error => {
+        res.status(500).json({
+          errorMessage:
+            'Could not validate user information for the specified ID'
         });
-      }
-    })
-    .catch(error => {
-      res.status(500).json({
-        errorMessage:
-          'Could not validate user information for the specified ID'
       });
-    });
+  } else {
+    next();
+  }
 }
 
 function validateUsername(req, res, next) {

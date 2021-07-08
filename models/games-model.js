@@ -58,7 +58,7 @@ function findGameChallenges(gameId, userId) {
           .where('uc.challenge_id', gameChallenge.challenge_id)
           .then(challenges => {
             // Map through the current users challenges to see which ones they completed, only if user is signed in
-            if (userId) {
+            if (userId !== 'no-user') {
               return db('userChallenges as uc')
                 .where('uc.challenge_id', gameChallenge.challenge_id)
                 .where('uc.user_id', userId)
@@ -127,7 +127,7 @@ function findGameChallengesByPopularity(gameId, userId) {
           .where('uc.challenge_id', gameChallenge.challenge_id)
           .then(challenges => {
             // Map through the current users challenges to see which ones they completed, only if user is signed in
-            if (userId) {
+            if (userId !== 'no-user') {
               return db('userChallenges as uc')
                 .where('uc.challenge_id', gameChallenge.challenge_id)
                 .where('uc.user_id', userId)
