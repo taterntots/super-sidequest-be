@@ -54,6 +54,22 @@ router.get('/recent/users/:userId', restrictedAdmin, (req, res) => {
     });
 });
 
+//*************** GET ALL POPULAR CHALLENGES (WITH COMPLETION FOR USER IF AVAILABLE) *****************//
+router.get('/popular/users/:userId', restrictedAdmin, (req, res) => {
+  const { userId } = req.params;
+
+  Challenges.findAllChallengesByPopularity(userId)
+    .then(challenges => {
+      res.json(challenges);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all popular challenges to display'
+      });
+    });
+});
+
 //*************** GET CHALLENGE BY ID *****************//
 router.get('/:challengeId', restrictedAdmin, validateChallengeId, (req, res) => {
   const { challengeId } = req.params;
