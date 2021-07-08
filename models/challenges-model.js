@@ -1,7 +1,7 @@
 const db = require('../data/dbConfig.js');
 
 //FIND ALL CHALLENGES
-function findChallenges() {
+function findChallenges(userId) {
   return db('challenges as c')
     .leftOuterJoin('users as u', 'c.user_id', 'u.id')
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
@@ -30,6 +30,43 @@ function findChallenges() {
     ])
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id')
     .orderBy('c.created_at', 'desc')
+    .then(challenges => {
+      // Loop through challenges, finding active users and attaching a completed bool if a user has accepted a challenge
+      return Promise.all(challenges.map(challenge => {
+        return db('userChallenges as uc')
+          .where('uc.challenge_id', challenge.challenge_id)
+          .then(userChallenges => {
+            if (userId !== 'no-user') {
+              return db('userChallenges as uc')
+                .where('uc.challenge_id', challenge.challenge_id)
+                .where('uc.user_id', userId)
+                .first()
+                .then(userChallenge => {
+                  if (userChallenge) {
+                    // Append completed bool is userChallenge exists (true or false)
+                    return {
+                      ...challenge,
+                      active_users: userChallenges.length,
+                      completed: userChallenge.completed
+                    }
+                  } else {
+                    // Otherwise, don't worry about the completed bool
+                    return {
+                      ...challenge,
+                      active_users: userChallenges.length
+                    }
+                  }
+                })
+            } else {
+              // If user is not signed in, simply return without accounting for completion
+              return {
+                ...challenge,
+                active_users: userChallenges.length
+              }
+            }
+          })
+      }))
+    })
 }
 
 //FIND ALL RECENT CHALLENGES (LIMITED TO SIX FOR HOMEPAGE)

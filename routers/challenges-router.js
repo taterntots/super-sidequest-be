@@ -11,8 +11,10 @@ const {
 } = require('../middleware/index.js');
 
 //*************** GET ALL CHALLENGES *****************//
-router.get('/', restrictedAdmin, (req, res) => {
-  Challenges.findChallenges()
+router.get('/users/:userId', restrictedAdmin, (req, res) => {
+  const { userId } = req.params;
+
+  Challenges.findChallenges(userId)
     .then(challenges => {
       res.json(challenges);
     })
