@@ -106,7 +106,7 @@ function findRecentChallenges(userId) {
         return db('userChallenges as uc')
           .where('uc.challenge_id', recentChallenge.challenge_id)
           .then(userChallenges => {
-            if (userId) {
+            if (userId !== 'no-user') {
               return db('userChallenges as uc')
                 .where('uc.challenge_id', recentChallenge.challenge_id)
                 .where('uc.user_id', userId)

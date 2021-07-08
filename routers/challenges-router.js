@@ -10,7 +10,7 @@ const {
   validateUserId
 } = require('../middleware/index.js');
 
-//*************** GET ALL CHALLENGES *****************//
+//*************** GET ALL CHALLENGES (WITH COMPLETION FOR USER IF AVAILABLE) *****************//
 router.get('/users/:userId', restrictedAdmin, (req, res) => {
   const { userId } = req.params;
 
@@ -26,21 +26,7 @@ router.get('/users/:userId', restrictedAdmin, (req, res) => {
     });
 });
 
-//*************** GET ALL RECENT CHALLENGES (LIMITED) *****************//
-router.get('/recent', restrictedAdmin, (req, res) => {
-  Challenges.findRecentChallenges()
-    .then(challenges => {
-      res.json(challenges);
-    })
-    .catch(err => {
-      console.log(err);
-      res.status(500).json({
-        error: 'There was an error getting all recent challenges to display'
-      });
-    });
-});
-
-//*************** GET ALL RECENT CHALLENGES (LIMITED) WITH COMPLETION FOR USER *****************//
+//*************** GET ALL RECENT CHALLENGES (LIMITED) (WITH COMPLETION FOR USER IF AVAILABLE) *****************//
 router.get('/recent/users/:userId', restrictedAdmin, (req, res) => {
   const { userId } = req.params;
 
@@ -51,7 +37,7 @@ router.get('/recent/users/:userId', restrictedAdmin, (req, res) => {
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        error: 'There was an error getting all recent challenges with completion data for users to display'
+        error: 'There was an error getting all recent challenges to display'
       });
     });
 });
