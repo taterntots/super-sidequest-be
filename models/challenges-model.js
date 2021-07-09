@@ -468,18 +468,38 @@ function findAllChallengeSpeedruns(challengeId) {
     .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
     .where('uc.challenge_id', challengeId)
     .where('c.is_speedrun', true)
+    .whereNot('uc.total_milliseconds', null)
     .select([
       'uc.*',
       'u.username'
     ])
     .groupBy('c.id', 'uc.id', 'u.id')
     .orderBy('uc.total_milliseconds', 'asc')
-    .then(response => {
-      if (response.length > 0) {
-        return response
-      } else {
-        return false
-      }
+    .then(speedrunUsers => {
+      return db('userChallenges as uc')
+        .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+        .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
+        .where('uc.challenge_id', challengeId)
+        .where('uc.total_milliseconds', null)
+        .select([
+          'uc.*',
+          'u.username'
+        ])
+        .groupBy('c.id', 'uc.id', 'u.id')
+        .orderBy('uc.created_at', 'asc')
+        .then(noScoreUsers => {
+          // Map through users without scores, pushing them at the bottom of the leaderboard with no scores attached
+          return Promise.all(noScoreUsers.map(noScoreUser => {
+            speedrunUsers.push(noScoreUser)
+          }))
+            .then(combinedUsers => {
+              if (speedrunUsers.length > 0) {
+                return speedrunUsers
+              } else {
+                return false
+              }
+            })
+        })
     })
 }
 
