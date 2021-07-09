@@ -47,6 +47,7 @@ function findChallenges(userId) {
                     return {
                       ...challenge,
                       active_users: userChallenges.length,
+                      is_active: userChallenge.is_active,
                       completed: userChallenge.completed
                     }
                   } else {
@@ -117,6 +118,7 @@ function findRecentChallenges(userId) {
                     return {
                       ...recentChallenge,
                       active_users: userChallenges.length,
+                      is_active: userChallenge.is_active,
                       completed: userChallenge.completed
                     }
                   } else {
@@ -185,6 +187,7 @@ function findAllChallengesByPopularity(userId) {
                     return {
                       ...challenge,
                       active_users: challenges.length,
+                      is_active: userChallenge.is_active,
                       completed: userChallenge.completed
                     }
                   } else {
@@ -301,6 +304,7 @@ function findUserCreatedChallenges(userId) {
                   return {
                     ...createdChallenge,
                     active_users: userChallenges.length,
+                    is_active: userChallenge.is_active,
                     completed: userChallenge.completed
                   }
                 } else {

@@ -69,6 +69,7 @@ function findGameChallenges(gameId, userId) {
                     return {
                       ...gameChallenge,
                       active_users: challenges.length,
+                      is_active: userChallenge.is_active,
                       completed: userChallenge.completed
                     }
                   } else {
@@ -138,6 +139,7 @@ function findGameChallengesByPopularity(gameId, userId) {
                     return {
                       ...gameChallenge,
                       active_users: challenges.length,
+                      is_active: userChallenge.is_active,
                       completed: userChallenge.completed
                     }
                   } else {
