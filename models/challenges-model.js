@@ -426,18 +426,38 @@ function findAllChallengeHighScores(challengeId) {
     .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
     .where('uc.challenge_id', challengeId)
     .where('c.is_high_score', true)
+    .whereNot('uc.high_score', null)
     .select([
       'uc.*',
       'u.username'
     ])
     .groupBy('c.id', 'uc.id', 'u.id')
     .orderBy('uc.high_score', 'desc')
-    .then(response => {
-      if (response.length > 0) {
-        return response
-      } else {
-        return false
-      }
+    .then(highscoreUsers => {
+      return db('userChallenges as uc')
+        .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+        .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
+        .where('uc.challenge_id', challengeId)
+        .where('uc.high_score', null)
+        .select([
+          'uc.*',
+          'u.username'
+        ])
+        .groupBy('c.id', 'uc.id', 'u.id')
+        .orderBy('uc.created_at', 'asc')
+        .then(noScoreUsers => {
+          // Map through users without scores, pushing them at the bottom of the leaderboard with no scores attached
+          return Promise.all(noScoreUsers.map(noScoreUser => {
+            highscoreUsers.push(noScoreUser)
+          }))
+            .then(combinedUsers => {
+              if (highscoreUsers.length > 0) {
+                return highscoreUsers
+              } else {
+                return false
+              }
+            })
+        })
     })
 }
 
