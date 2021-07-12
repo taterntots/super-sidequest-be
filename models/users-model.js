@@ -3,6 +3,7 @@ const db = require('../data/dbConfig.js');
 //FIND ALL USERS
 function findUsers() {
   return db('users')
+  .orderBy('username', 'asc')
 }
 
 //FIND USER BY ID
