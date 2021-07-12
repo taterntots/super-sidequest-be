@@ -30,7 +30,7 @@ function restrictedUser(req, res, next) {
     jwt.verify(token, jwtSecret, (err, decodedToken) => {
       if (err) {
         //i.e: the token is not valid
-        res.status(401).json({ errorMessage: 'The provided token is invalid / expired' })
+        res.status(401).json({ errorMessage: 'Session has expired. Please login again.' })
       } else {
         req.user = { id: decodedToken.id };
         next();
