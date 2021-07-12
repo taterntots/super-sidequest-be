@@ -5,6 +5,19 @@ function findPublicGames() {
   return db('games as g')
     .where('g.public', true)
     .orderBy('g.name', 'asc')
+    .then(publicGames => {
+      // Find total number of challenges for each game
+      return Promise.all(publicGames.map(publicGame => {
+        return db('challenges as c')
+          .where('c.game_id', publicGame.id)
+          .then(challenges => {
+            return {
+              ...publicGame,
+              challenge_total: challenges.length
+            }
+          })
+      }))
+    })
 }
 
 //FIND ALL PRIVATE GAMES
@@ -12,6 +25,19 @@ function findPrivateGames() {
   return db('games as g')
     .where('g.public', false)
     .orderBy('g.name', 'asc')
+    .then(privateGames => {
+      // Find total number of challenges for each game
+      return Promise.all(privateGames.map(privateGame => {
+        return db('challenges as c')
+          .where('c.game_id', privateGame.id)
+          .then(challenges => {
+            return {
+              ...privateGame,
+              challenge_total: challenges.length
+            }
+          })
+      }))
+    })
 }
 
 //FIND GAME BY ID
