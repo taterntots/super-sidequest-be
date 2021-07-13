@@ -40,6 +40,51 @@ function findPrivateGames() {
     })
 }
 
+//FIND ONLY GAMES A USER HAS ACCEPTED CHALLANGES FOR
+function findUserAcceptedGames(userId) {
+  gameHash = []
+  userAcceptedGames = []
+
+  return db('userChallenges as uc')
+    .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+    .where('uc.user_id', userId)
+    .select([
+      'uc.*',
+      'c.game_id'
+    ])
+    .groupBy('c.id', 'uc.id')
+    .then(userAcceptedChallenges => {
+      // Map through user accepted/completed challenges, storing unique games in a hash
+      Promise.all(userAcceptedChallenges.map(userAcceptedChallenge => {
+        if (!gameHash.includes(userAcceptedChallenge.game_id)) {
+          gameHash.push(userAcceptedChallenge.game_id)
+        }
+      }))
+      return db('challenges as c')
+        .where('c.user_id', userId)
+        .then(userCreatedChallenges => {
+          // Map through user created challenges, storing unique games in a hash
+          Promise.all(userCreatedChallenges.map(userCreatedChallenge => {
+            if (!gameHash.includes(userCreatedChallenge.game_id)) {
+              gameHash.push(userCreatedChallenge.game_id)
+            }
+          }))
+          return db('games as g')
+            .where('g.public', true)
+            .orderBy('g.name', 'asc')
+            .then(publicGames => {
+              // Map through public games, comparing game ids in hash table
+              Promise.all(publicGames.map(publicGame => {
+                if (gameHash.includes(publicGame.id)) {
+                  userAcceptedGames.push(publicGame)
+                }
+              }))
+              return userAcceptedGames
+            })
+        })
+    })
+}
+
 //FIND GAME BY ID
 function findGameById(gameId) {
   return db('games as g')
@@ -242,6 +287,7 @@ function findIfGameExists(gameName) {
 module.exports = {
   findPublicGames,
   findPrivateGames,
+  findUserAcceptedGames,
   findGameById,
   findGameChallenges,
   findGameChallengesByPopularity,

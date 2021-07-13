@@ -30,6 +30,22 @@ router.get('/private', restrictedAdmin, (req, res) => {
     });
 });
 
+//*************** GET ONLY GAMES A USER HAS ACCEPTED CHALLANGES FOR *****************//
+router.get('/users/:userId', restrictedAdmin, validateUserId, (req, res) => {
+  const { userId } = req.params;
+
+  Games.findUserAcceptedGames(userId)
+    .then(userAcceptedGames => {
+      res.json(userAcceptedGames);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all accepted gamed for the user to display'
+      });
+    });
+});
+
 //*************** GET GAME BY ID *****************//
 router.get('/:gameId', validateGameId, restrictedAdmin, (req, res) => {
   const { gameId } = req.params;
