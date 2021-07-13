@@ -43,7 +43,7 @@ function findPrivateGames() {
 //FIND ONLY GAMES A USER HAS ACCEPTED CHALLANGES FOR
 function findUserAcceptedGames(userId) {
   gameHash = []
-  userAcceptedGames = []
+  userAcceptedGames = [{ id: "tb7253b8-51a8-4663-870f-9ep2d962o60a", name: 'All' }] // Creates an all option at top
 
   return db('userChallenges as uc')
     .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
