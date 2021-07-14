@@ -1,10 +1,24 @@
 const db = require('../data/dbConfig.js');
+const moment = require('moment')
 
 //FIND ALL PUBLIC GAMES
 function findPublicGames() {
   return db('games as g')
     .where('g.public', true)
     .orderBy('g.name', 'asc')
+    .then(publicGames => {
+      // Find total number of challenges for each game
+      return Promise.all(publicGames.map(publicGame => {
+        return db('challenges as c')
+          .where('c.game_id', publicGame.id)
+          .then(challenges => {
+            return {
+              ...publicGame,
+              challenge_total: challenges.length
+            }
+          })
+      }))
+    })
 }
 
 //FIND ALL PRIVATE GAMES
@@ -12,6 +26,64 @@ function findPrivateGames() {
   return db('games as g')
     .where('g.public', false)
     .orderBy('g.name', 'asc')
+    .then(privateGames => {
+      // Find total number of challenges for each game
+      return Promise.all(privateGames.map(privateGame => {
+        return db('challenges as c')
+          .where('c.game_id', privateGame.id)
+          .then(challenges => {
+            return {
+              ...privateGame,
+              challenge_total: challenges.length
+            }
+          })
+      }))
+    })
+}
+
+//FIND ONLY GAMES A USER HAS ACCEPTED CHALLANGES FOR
+function findUserAcceptedGames(userId) {
+  gameHash = []
+  userAcceptedGames = [{ id: "tb7253b8-51a8-4663-870f-9ep2d962o60a", name: 'All' }] // Creates an all option at top
+
+  return db('userChallenges as uc')
+    .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+    .where('uc.user_id', userId)
+    .select([
+      'uc.*',
+      'c.game_id'
+    ])
+    .groupBy('c.id', 'uc.id')
+    .then(userAcceptedChallenges => {
+      // Map through user accepted/completed challenges, storing unique games in a hash
+      Promise.all(userAcceptedChallenges.map(userAcceptedChallenge => {
+        if (!gameHash.includes(userAcceptedChallenge.game_id)) {
+          gameHash.push(userAcceptedChallenge.game_id)
+        }
+      }))
+      return db('challenges as c')
+        .where('c.user_id', userId)
+        .then(userCreatedChallenges => {
+          // Map through user created challenges, storing unique games in a hash
+          Promise.all(userCreatedChallenges.map(userCreatedChallenge => {
+            if (!gameHash.includes(userCreatedChallenge.game_id)) {
+              gameHash.push(userCreatedChallenge.game_id)
+            }
+          }))
+          return db('games as g')
+            .where('g.public', true)
+            .orderBy('g.name', 'asc')
+            .then(publicGames => {
+              // Map through public games, comparing game ids in hash table
+              Promise.all(publicGames.map(publicGame => {
+                if (gameHash.includes(publicGame.id)) {
+                  userAcceptedGames.push(publicGame)
+                }
+              }))
+              return userAcceptedGames
+            })
+        })
+    })
 }
 
 //FIND GAME BY ID
@@ -167,6 +239,82 @@ function findGameChallengesByPopularity(gameId, userId) {
     })
 }
 
+//FIND ALL OF A GAME'S CHALLENGES SORTED BY EXPIRATION DATE
+function findGameChallengesByExpiration(gameId, userId) {
+  return db('challenges as c')
+    .leftOuterJoin('users as u', 'c.user_id', 'u.id')
+    .leftOuterJoin('games as g', 'c.game_id', 'g.id')
+    .leftOuterJoin('systems as s', 'c.system_id', 's.id')
+    .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
+    .where('c.game_id', gameId)
+    .select([
+      'c.id as challenge_id',
+      'c.name',
+      'c.description',
+      'u.username',
+      'g.name as game_title',
+      'g.banner_pic_URL',
+      's.name as system',
+      'd.name as difficulty',
+      'd.points',
+      'c.rules',
+      'c.is_high_score',
+      'c.is_speedrun',
+      'c.featured',
+      'c.prize',
+      'c.start_date',
+      'c.end_date',
+      'c.created_at',
+      'c.updated_at'
+    ])
+    .orderBy('c.end_date', 'asc')
+    .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id')
+    .then(gameChallenges => {
+      // Map through the gameChallenges and find number of users who accepted each one
+      return Promise.all(gameChallenges.map(gameChallenge => {
+        return db('userChallenges as uc')
+          .where('uc.challenge_id', gameChallenge.challenge_id)
+          .then(challenges => {
+            // Map through the current users challenges to see which ones they completed, only if user is signed in
+            if (userId !== 'no-user') {
+              return db('userChallenges as uc')
+                .where('uc.challenge_id', gameChallenge.challenge_id)
+                .where('uc.user_id', userId)
+                .first()
+                .then(userChallenge => {
+                  if (userChallenge) {
+                    // Append completed bool is userChallenge exists (true or false)
+                    return {
+                      ...gameChallenge,
+                      active_users: challenges.length,
+                      is_active: userChallenge.is_active,
+                      completed: userChallenge.completed
+                    }
+                  } else {
+                    // Otherwise, don't worry about the completed bool
+                    return {
+                      ...gameChallenge,
+                      active_users: challenges.length
+                    }
+                  }
+                })
+            } else {
+              // If user is not signed in, simply return without accounting for completion
+              return {
+                ...gameChallenge,
+                active_users: challenges.length
+              }
+            }
+          })
+      }))
+        .then(activeUserChallenges => {
+          // Sort by quest that's closest to expiring
+          let sortedByExpiringSoonArray = activeUserChallenges.sort((a, b) => a.end_date - b.end_date)
+          return sortedByExpiringSoonArray.filter(fc => moment(fc.end_date).isAfter())
+        })
+    })
+}
+
 //FIND GAMES BY A SPECIFIC FILTER (NEEDED FOR VALIDATION MIDDLEWARE)
 function findGamesBy(filter) {
   return db('games')
@@ -216,9 +364,11 @@ function findIfGameExists(gameName) {
 module.exports = {
   findPublicGames,
   findPrivateGames,
+  findUserAcceptedGames,
   findGameById,
   findGameChallenges,
   findGameChallengesByPopularity,
+  findGameChallengesByExpiration,
   findGamesBy,
   addGame,
   removeGameById,

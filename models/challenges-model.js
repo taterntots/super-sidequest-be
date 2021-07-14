@@ -1,4 +1,5 @@
 const db = require('../data/dbConfig.js');
+const moment = require('moment')
 
 //FIND ALL CHALLENGES
 function findChallenges(userId) {
@@ -259,7 +260,7 @@ function findChallengesBy(filter) {
 }
 
 //FIND ALL OF A USER'S CREATED CHALLENGES
-function findUserCreatedChallenges(userId) {
+function findUserCreatedChallenges(userId, sortOption) {
   return db('challenges as c')
     .leftOuterJoin('users as u', 'c.user_id', 'u.id')
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
@@ -316,11 +317,24 @@ function findUserCreatedChallenges(userId) {
               })
           })
       }))
+        .then(createdUserChallenges => {
+          // If sortOption exists, sort by given parameter
+          if (sortOption === 'popular') {
+            let sortedByActiveUsersArray = createdUserChallenges.sort((a, b) => b.active_users - a.active_users)
+            return sortedByActiveUsersArray
+          } else if (sortOption === 'expire') {
+            let sortedByExpiringSoonArray = createdUserChallenges.sort((a, b) => a.end_date - b.end_date)
+            return sortedByExpiringSoonArray.filter(fc => moment(fc.end_date).isAfter())
+            //Otherwise, simply return all created challenges in order of most recent creation
+          } else {
+            return createdUserChallenges
+          }
+        })
     })
 }
 
 //FIND ALL OF A USER'S ACCEPTED CHALLENGES
-function findUserAcceptedChallenges(userId) {
+function findUserAcceptedChallenges(userId, sortOption) {
   return db('userChallenges as uc')
     .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
     .leftOuterJoin('users as u', 'c.user_id', 'u.id')
@@ -355,7 +369,7 @@ function findUserAcceptedChallenges(userId) {
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id', 'uc.id')
     .orderBy('uc.updated_at', 'desc')
     .then(acceptedChallenges => {
-      // Loop through accepted challenges, finding active users and attaching a completed bool if a user has accepted a challenge
+      // Loop through accepted challenges, finding active users
       return Promise.all(acceptedChallenges.map(acceptedChallenge => {
         return db('userChallenges as uc')
           .where('uc.challenge_id', acceptedChallenge.challenge_id)
@@ -366,11 +380,24 @@ function findUserAcceptedChallenges(userId) {
             }
           })
       }))
+        .then(acceptedUserChallenges => {
+          // If sortOption exists, sort by given parameter
+          if (sortOption === 'popular') {
+            let sortedByActiveUsersArray = acceptedUserChallenges.sort((a, b) => b.active_users - a.active_users)
+            return sortedByActiveUsersArray
+          } else if (sortOption === 'expire') {
+            let sortedByExpiringSoonArray = acceptedUserChallenges.sort((a, b) => a.end_date - b.end_date)
+            return sortedByExpiringSoonArray.filter(fc => moment(fc.end_date).isAfter())
+            //Otherwise, simply return all accepted challenges in order of most recent creation
+          } else {
+            return acceptedUserChallenges
+          }
+        })
     })
 }
 
 //FIND ALL OF A USER'S COMPLETED CHALLENGES
-function findUserCompletedChallenges(userId) {
+function findUserCompletedChallenges(userId, sortOption) {
   return db('userChallenges as uc')
     .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
     .leftOuterJoin('users as u', 'c.user_id', 'u.id')
@@ -405,7 +432,7 @@ function findUserCompletedChallenges(userId) {
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id', 'uc.id')
     .orderBy('uc.updated_at', 'desc')
     .then(completedChallenges => {
-      // Loop through completed challenges, finding active users and attaching a completed bool if a user has accepted a challenge
+      // Loop through completed challenges, finding active users
       return Promise.all(completedChallenges.map(completedChallenge => {
         return db('userChallenges as uc')
           .where('uc.challenge_id', completedChallenge.challenge_id)
@@ -416,6 +443,19 @@ function findUserCompletedChallenges(userId) {
             }
           })
       }))
+        .then(completedUserChallenges => {
+          // If sortOption exists, sort by given parameter
+          if (sortOption === 'popular') {
+            let sortedByActiveUsersArray = completedUserChallenges.sort((a, b) => b.active_users - a.active_users)
+            return sortedByActiveUsersArray
+          } else if (sortOption === 'expire') {
+            let sortedByExpiringSoonArray = completedUserChallenges.sort((a, b) => a.end_date - b.end_date)
+            return sortedByExpiringSoonArray.filter(fc => moment(fc.end_date).isAfter())
+            //Otherwise, simply return all completed challenges in order of most recent creation
+          } else {
+            return completedUserChallenges
+          }
+        })
     })
 }
 

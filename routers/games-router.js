@@ -30,6 +30,22 @@ router.get('/private', restrictedAdmin, (req, res) => {
     });
 });
 
+//*************** GET ONLY GAMES A USER HAS ACCEPTED CHALLANGES FOR *****************//
+router.get('/users/:userId', restrictedAdmin, validateUserId, (req, res) => {
+  const { userId } = req.params;
+
+  Games.findUserAcceptedGames(userId)
+    .then(userAcceptedGames => {
+      res.json(userAcceptedGames);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all accepted gamed for the user to display'
+      });
+    });
+});
+
 //*************** GET GAME BY ID *****************//
 router.get('/:gameId', validateGameId, restrictedAdmin, (req, res) => {
   const { gameId } = req.params;
@@ -79,6 +95,24 @@ router.get('/:gameId/challenges/popular/users/:userId', validateGameId, validate
       });
     });
 });
+
+//*************** GET ALL OF A GAME'S CHALLENGES SORTED BY EXPIRATION DATE *****************//
+router.get('/:gameId/challenges/expire/users/:userId', validateGameId, validateUserId, restrictedAdmin, (req, res) => {
+  const { gameId } = req.params;
+  const { userId } = req.params;
+
+  Games.findGameChallengesByExpiration(gameId, userId)
+    .then(challenges => {
+      res.json(challenges);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all game challenges sorted by expiration date to display'
+      });
+    });
+});
+
 
 //*************** ADD NEW GAME TO THE DATABASE *****************//
 router.post('/', checkForGameData, restrictedUser, (req, res) => {
