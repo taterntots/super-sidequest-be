@@ -259,7 +259,7 @@ function findChallengesBy(filter) {
 }
 
 //FIND ALL OF A USER'S CREATED CHALLENGES
-function findUserCreatedChallenges(userId) {
+function findUserCreatedChallenges(userId, sortOption) {
   return db('challenges as c')
     .leftOuterJoin('users as u', 'c.user_id', 'u.id')
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
@@ -316,6 +316,16 @@ function findUserCreatedChallenges(userId) {
               })
           })
       }))
+        .then(createdUserChallenges => {
+          // If sortOption exists, sort by given parameter
+          if (sortOption === 'popular') {
+            let sortedByActiveUsersArray = createdUserChallenges.sort((a, b) => b.active_users - a.active_users)
+            return sortedByActiveUsersArray
+            //Otherwise, simply return all created Challenges in order of most recent creation
+          } else {
+            return createdUserChallenges
+          }
+        })
     })
 }
 
@@ -355,7 +365,7 @@ function findUserAcceptedChallenges(userId) {
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id', 'uc.id')
     .orderBy('uc.updated_at', 'desc')
     .then(acceptedChallenges => {
-      // Loop through accepted challenges, finding active users and attaching a completed bool if a user has accepted a challenge
+      // Loop through accepted challenges, finding active users
       return Promise.all(acceptedChallenges.map(acceptedChallenge => {
         return db('userChallenges as uc')
           .where('uc.challenge_id', acceptedChallenge.challenge_id)
@@ -405,7 +415,7 @@ function findUserCompletedChallenges(userId) {
     .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id', 'uc.id')
     .orderBy('uc.updated_at', 'desc')
     .then(completedChallenges => {
-      // Loop through completed challenges, finding active users and attaching a completed bool if a user has accepted a challenge
+      // Loop through completed challenges, finding active users
       return Promise.all(completedChallenges.map(completedChallenge => {
         return db('userChallenges as uc')
           .where('uc.challenge_id', completedChallenge.challenge_id)

@@ -66,10 +66,11 @@ router.get('/:userId/is-admin', validateUserId, restrictedAdmin, (req, res) => {
 });
 
 //*************** GET ALL OF A USER'S CREATED CHALLENGES *****************//
-router.get('/:userId/created-challenges', validateUserId, restrictedAdmin, (req, res) => {
+router.get('/:userId/created-challenges/:sortOption', validateUserId, restrictedAdmin, (req, res) => {
   const { userId } = req.params;
+  const { sortOption } = req.params;
 
-  Challenges.findUserCreatedChallenges(userId)
+  Challenges.findUserCreatedChallenges(userId, sortOption)
     .then(user => {
       res.json(user);
     })
