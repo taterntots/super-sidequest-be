@@ -1,4 +1,5 @@
 const db = require('../data/dbConfig.js');
+const moment = require('moment')
 
 //FIND ALL CHALLENGES
 function findChallenges(userId) {
@@ -321,6 +322,9 @@ function findUserCreatedChallenges(userId, sortOption) {
           if (sortOption === 'popular') {
             let sortedByActiveUsersArray = createdUserChallenges.sort((a, b) => b.active_users - a.active_users)
             return sortedByActiveUsersArray
+          } else if (sortOption === 'expire') {
+            let sortedByExpiringSoonArray = createdUserChallenges.sort((a, b) => a.end_date - b.end_date)
+            return sortedByExpiringSoonArray.filter(fc => moment(fc.end_date).isAfter())
             //Otherwise, simply return all created challenges in order of most recent creation
           } else {
             return createdUserChallenges
@@ -381,6 +385,9 @@ function findUserAcceptedChallenges(userId, sortOption) {
           if (sortOption === 'popular') {
             let sortedByActiveUsersArray = acceptedUserChallenges.sort((a, b) => b.active_users - a.active_users)
             return sortedByActiveUsersArray
+          } else if (sortOption === 'expire') {
+            let sortedByExpiringSoonArray = acceptedUserChallenges.sort((a, b) => a.end_date - b.end_date)
+            return sortedByExpiringSoonArray.filter(fc => moment(fc.end_date).isAfter())
             //Otherwise, simply return all accepted challenges in order of most recent creation
           } else {
             return acceptedUserChallenges
@@ -441,6 +448,9 @@ function findUserCompletedChallenges(userId, sortOption) {
           if (sortOption === 'popular') {
             let sortedByActiveUsersArray = completedUserChallenges.sort((a, b) => b.active_users - a.active_users)
             return sortedByActiveUsersArray
+          } else if (sortOption === 'expire') {
+            let sortedByExpiringSoonArray = completedUserChallenges.sort((a, b) => a.end_date - b.end_date)
+            return sortedByExpiringSoonArray.filter(fc => moment(fc.end_date).isAfter())
             //Otherwise, simply return all completed challenges in order of most recent creation
           } else {
             return completedUserChallenges
