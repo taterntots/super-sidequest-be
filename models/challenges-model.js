@@ -216,6 +216,81 @@ function findAllChallengesByPopularity(userId) {
     })
 }
 
+//FIND ALL CHALLENGES SORTED BY EXPIRATION DATE
+function findAllChallengesByExpiration(userId) {
+  return db('challenges as c')
+    .leftOuterJoin('users as u', 'c.user_id', 'u.id')
+    .leftOuterJoin('games as g', 'c.game_id', 'g.id')
+    .leftOuterJoin('systems as s', 'c.system_id', 's.id')
+    .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
+    .select([
+      'c.id as challenge_id',
+      'c.name',
+      'c.description',
+      'u.username',
+      'g.name as game_title',
+      'g.banner_pic_URL',
+      's.name as system',
+      'd.name as difficulty',
+      'd.points',
+      'c.rules',
+      'c.is_high_score',
+      'c.is_speedrun',
+      'c.featured',
+      'c.prize',
+      'c.start_date',
+      'c.end_date',
+      'c.created_at',
+      'c.updated_at'
+    ])
+    .orderBy('c.end_date', 'asc')
+    .groupBy('c.id', 'u.id', 'g.id', 's.id', 'd.id')
+    .then(challenges => {
+      // Map through the challenges and find number of users who accepted each one
+      return Promise.all(challenges.map(challenge => {
+        return db('userChallenges as uc')
+          .where('uc.challenge_id', challenge.challenge_id)
+          .then(challenges => {
+            // Map through the current users challenges to see which ones they completed, only if user is signed in
+            if (userId !== 'no-user') {
+              return db('userChallenges as uc')
+                .where('uc.challenge_id', challenge.challenge_id)
+                .where('uc.user_id', userId)
+                .first()
+                .then(userChallenge => {
+                  if (userChallenge) {
+                    // Append completed bool is userChallenge exists (true or false)
+                    return {
+                      ...challenge,
+                      active_users: challenges.length,
+                      is_active: userChallenge.is_active,
+                      completed: userChallenge.completed
+                    }
+                  } else {
+                    // Otherwise, don't worry about the completed bool
+                    return {
+                      ...challenge,
+                      active_users: challenges.length
+                    }
+                  }
+                })
+            } else {
+              // If user is not signed in, simply return without accounting for completion
+              return {
+                ...challenge,
+                active_users: challenges.length
+              }
+            }
+          })
+      }))
+        .then(activeUserChallenges => {
+          // Sort by quest that's closest to expiring
+          let sortedByExpiringSoonArray = activeUserChallenges.sort((a, b) => a.end_date - b.end_date)
+          return sortedByExpiringSoonArray.filter(fc => moment(fc.end_date).isAfter())
+        })
+    })
+}
+
 //FIND CHALLENGE BY ID
 function findChallengeById(challengeId) {
   return db('challenges as c')
@@ -755,6 +830,7 @@ module.exports = {
   findChallenges,
   findRecentChallenges,
   findAllChallengesByPopularity,
+  findAllChallengesByExpiration,
   findChallengeById,
   findChallengesBy,
   findUserCreatedChallenges,

@@ -58,6 +58,22 @@ router.get('/popular/users/:userId', restrictedAdmin, validateUserId, (req, res)
     });
 });
 
+//*************** GET ALL CHALLENGES SORTED BY EXPIRATION DATE (WITH COMPLETION FOR USER IF AVAILABLE) *****************//
+router.get('/expire/users/:userId', restrictedAdmin, validateUserId, (req, res) => {
+  const { userId } = req.params;
+
+  Challenges.findAllChallengesByExpiration(userId)
+    .then(challenges => {
+      res.json(challenges);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all challenges by expiration date to display'
+      });
+    });
+});
+
 //*************** GET CHALLENGE BY ID *****************//
 router.get('/:challengeId', restrictedAdmin, validateChallengeId, (req, res) => {
   const { challengeId } = req.params;
