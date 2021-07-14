@@ -83,10 +83,11 @@ router.get('/:userId/created-challenges/:sortOption', validateUserId, restricted
 });
 
 //*************** GET ALL OF A USER'S ACCEPTED CHALLENGES *****************//
-router.get('/:userId/accepted-challenges', validateUserId, restrictedAdmin, (req, res) => {
+router.get('/:userId/accepted-challenges/:sortOption', validateUserId, restrictedAdmin, (req, res) => {
   const { userId } = req.params;
+  const { sortOption } = req.params;
 
-  Challenges.findUserAcceptedChallenges(userId)
+  Challenges.findUserAcceptedChallenges(userId, sortOption)
     .then(user => {
       res.json(user);
     })
@@ -99,10 +100,11 @@ router.get('/:userId/accepted-challenges', validateUserId, restrictedAdmin, (req
 });
 
 //*************** GET ALL OF A USER'S COMPLETED CHALLENGES *****************//
-router.get('/:userId/completed-challenges', validateUserId, restrictedAdmin, (req, res) => {
+router.get('/:userId/completed-challenges/:sortOption', validateUserId, restrictedAdmin, (req, res) => {
   const { userId } = req.params;
+  const { sortOption } = req.params;
 
-  Challenges.findUserCompletedChallenges(userId)
+  Challenges.findUserCompletedChallenges(userId, sortOption)
     .then(user => {
       res.json(user);
     })

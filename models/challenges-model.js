@@ -321,7 +321,7 @@ function findUserCreatedChallenges(userId, sortOption) {
           if (sortOption === 'popular') {
             let sortedByActiveUsersArray = createdUserChallenges.sort((a, b) => b.active_users - a.active_users)
             return sortedByActiveUsersArray
-            //Otherwise, simply return all created Challenges in order of most recent creation
+            //Otherwise, simply return all created challenges in order of most recent creation
           } else {
             return createdUserChallenges
           }
@@ -330,7 +330,7 @@ function findUserCreatedChallenges(userId, sortOption) {
 }
 
 //FIND ALL OF A USER'S ACCEPTED CHALLENGES
-function findUserAcceptedChallenges(userId) {
+function findUserAcceptedChallenges(userId, sortOption) {
   return db('userChallenges as uc')
     .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
     .leftOuterJoin('users as u', 'c.user_id', 'u.id')
@@ -376,11 +376,21 @@ function findUserAcceptedChallenges(userId) {
             }
           })
       }))
+        .then(acceptedUserChallenges => {
+          // If sortOption exists, sort by given parameter
+          if (sortOption === 'popular') {
+            let sortedByActiveUsersArray = acceptedUserChallenges.sort((a, b) => b.active_users - a.active_users)
+            return sortedByActiveUsersArray
+            //Otherwise, simply return all accepted challenges in order of most recent creation
+          } else {
+            return acceptedUserChallenges
+          }
+        })
     })
 }
 
 //FIND ALL OF A USER'S COMPLETED CHALLENGES
-function findUserCompletedChallenges(userId) {
+function findUserCompletedChallenges(userId, sortOption) {
   return db('userChallenges as uc')
     .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
     .leftOuterJoin('users as u', 'c.user_id', 'u.id')
@@ -426,6 +436,16 @@ function findUserCompletedChallenges(userId) {
             }
           })
       }))
+        .then(completedUserChallenges => {
+          // If sortOption exists, sort by given parameter
+          if (sortOption === 'popular') {
+            let sortedByActiveUsersArray = completedUserChallenges.sort((a, b) => b.active_users - a.active_users)
+            return sortedByActiveUsersArray
+            //Otherwise, simply return all completed challenges in order of most recent creation
+          } else {
+            return completedUserChallenges
+          }
+        })
     })
 }
 
