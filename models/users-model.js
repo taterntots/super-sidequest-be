@@ -74,7 +74,9 @@ function followUser(userId, followerId) {
     .first()
     .select('u.*')
     .then(follower => {
-      if (follower) {
+      if (userId === followerId) {
+        return { errorMessage: `You cannot follow yourself` }
+      } else if (follower) {
         return { errorMessage: `You are already following ${follower.username}` }
       } else {
         return db('userFollowers')
@@ -102,7 +104,9 @@ function unfollowUser(userId, followerId) {
     .first()
     .select('u.*')
     .then(follower => {
-      if (follower) {
+      if (userId === followerId) {
+        return { errorMessage: `You cannot unfollow yourself` }
+      } else if (follower) {
         return db('userFollowers as uf')
           .where('uf.user_id', userId)
           .where('uf.follower_id', followerId)
