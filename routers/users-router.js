@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const Users = require('../models/users-model.js')
 const Challenges = require('../models/challenges-model.js')
-const { validateUserId, validateUsername, checkForUserData, restrictedUser, restrictedAdmin } = require('../middleware/index.js');
+const { validateUserId, validateFollowerId, validateUsername, checkForUserData, restrictedUser, restrictedAdmin } = require('../middleware/index.js');
 
 //*************** GET ALL USERS *****************//
 router.get('/', restrictedAdmin, (req, res) => {
@@ -61,6 +61,22 @@ router.get('/:userId/is-admin', validateUserId, restrictedAdmin, (req, res) => {
       console.log(err);
       res.status(500).json({
         error: 'There was an error validating admin status for this user'
+      });
+    });
+});
+
+//*************** GET ALL OF A USER'S FOLLOWERS *****************//
+router.get('/:userId/followers', validateUserId, restrictedAdmin, (req, res) => {
+  const { userId } = req.params;
+
+  Users.findAllUserFollowers(userId)
+    .then(userFollowers => {
+      res.json(userFollowers);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all the followers for this user'
       });
     });
 });
@@ -179,6 +195,40 @@ router.delete('/:userId', validateUserId, restrictedAdmin, (req, res) => {
       console.log(err);
       res.status(500).json({
         error: `There was an error deleting this user`
+      });
+    });
+});
+
+//*************** FOLLOW A USER *****************//
+router.post('/:userId/followers/:followerId', restrictedAdmin, validateUserId, validateFollowerId, (req, res) => {
+  let { userId } = req.params;
+  let { followerId } = req.params
+
+  Users.followUser(userId, followerId)
+    .then(response => {
+      res.status(201).json(response);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error following this user'
+      });
+    });
+});
+
+//*************** UNFOLLOW A USER *****************//
+router.delete('/:userId/followers/:followerId', validateUserId, validateFollowerId, restrictedAdmin, (req, res) => {
+  let { userId } = req.params;
+  let { followerId } = req.params
+
+  Users.unfollowUser(userId, followerId)
+    .then(response => {
+      res.status(200).json(response);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: `There was an error unfollowing this user`
       });
     });
 });

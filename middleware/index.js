@@ -70,6 +70,28 @@ function validateUserId(req, res, next) {
   }
 }
 
+function validateFollowerId(req, res, next) {
+  const { followerId } = req.params;
+  id = followerId
+
+  Users.findUsersBy({ id })
+    .then(user => {
+      if (user.length > 0) {
+        next();
+      } else {
+        res.status(404).json({
+          errorMessage: 'The follower with the specified ID does not exist'
+        });
+      }
+    })
+    .catch(error => {
+      res.status(500).json({
+        errorMessage:
+          'Could not validate follower information for the specified ID'
+      });
+    });
+}
+
 function validateUsername(req, res, next) {
   const { username } = req.params;
 
@@ -392,6 +414,7 @@ module.exports = {
   restrictedAdmin,
   restrictedUser,
   validateUserId,
+  validateFollowerId,
   validateUsername,
   checkForUserData,
   validateGameId,
