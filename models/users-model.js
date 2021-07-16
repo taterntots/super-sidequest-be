@@ -124,6 +124,23 @@ function unfollowUser(userId, followerId) {
     })
 }
 
+//CHECK IF A USER IS FOLLOWING SOMEONE
+function checkIfFollowingUser(userId, followerId) {
+  return db('userFollowers as uf')
+    .leftOuterJoin('users as u', 'uf.follower_id', 'u.id')
+    .where('uf.user_id', userId)
+    .where('uf.follower_id', followerId)
+    .first()
+    .select('u.*')
+    .then(follower => {
+      if (follower) {
+        return true
+      } else {
+        return false
+      }
+    })
+}
+
 //UPDATE A USER
 function updateUserById(userId, changes) {
   return db('users')
@@ -173,6 +190,7 @@ module.exports = {
   removeUserById,
   followUser,
   unfollowUser,
+  checkIfFollowingUser,
   updateUserById,
   findIfUserEmailExists,
   findIfUserNameExists

@@ -233,6 +233,23 @@ router.delete('/:userId/followers/:followerId', validateUserId, validateFollower
     });
 });
 
+//*************** CHECK IF A USER IS FOLLOWING SOMEONE *****************//
+router.get('/:userId/followers/:followerId', validateUserId, validateFollowerId, restrictedAdmin, (req, res) => {
+  let { userId } = req.params;
+  let { followerId } = req.params
+
+  Users.checkIfFollowingUser(userId, followerId)
+    .then(response => {
+      res.status(200).json(response);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: `There was an error unfollowing this user`
+      });
+    });
+});
+
 //*************** UPDATE USER *****************//
 router.put('/:userId', validateUserId, restrictedUser, (req, res) => {
   const userId = req.params.userId;
