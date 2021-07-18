@@ -179,6 +179,29 @@ function findIfUserNameExists(username) {
     })
 }
 
+//FIND A USER'S TOTAL EXPERIENCE POINTS FOR ALL GAMES
+function findUserEXPForAllGames(userId) {
+  return db('userChallenges as uc')
+    .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
+    .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+    .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
+    .where('uc.user_id', userId)
+    .where('uc.completed', true)
+    .select([
+      'c.id as challenge_id',
+      'c.name as challenge_name',
+      'd.points'
+    ])
+    .then(completedChallenges => {
+      let totalExperiencePoints = 0
+
+      completedChallenges.map(completedChallenge => {
+        totalExperiencePoints += completedChallenge.points
+      })
+      return { experience_points: totalExperiencePoints }
+    })
+}
+
 module.exports = {
   findUsers,
   findUserById,
@@ -193,5 +216,6 @@ module.exports = {
   checkIfFollowingUser,
   updateUserById,
   findIfUserEmailExists,
-  findIfUserNameExists
+  findIfUserNameExists,
+  findUserEXPForAllGames
 };

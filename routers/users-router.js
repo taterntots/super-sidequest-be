@@ -270,4 +270,20 @@ router.put('/:userId', validateUserId, restrictedUser, (req, res) => {
     });
 });
 
+//*************** GET A USER'S LEVEL FOR ALL GAMES *****************//
+router.get('/:userId/exp', validateUserId, restrictedAdmin, (req, res) => {
+  let { userId } = req.params;
+
+  Users.findUserEXPForAllGames(userId)
+    .then(response => {
+      res.status(200).json(response);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: `There was an error getting this user's experience points for all games`
+      });
+    });
+});
+
 module.exports = router;
