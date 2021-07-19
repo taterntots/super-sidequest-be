@@ -286,4 +286,21 @@ router.get('/:userId/exp', validateUserId, restrictedAdmin, (req, res) => {
     });
 });
 
+//*************** GET A USER'S LEVEL FOR A SPECIFIC GAME *****************//
+router.get('/:userId/games/:gameId/exp', validateUserId, restrictedAdmin, (req, res) => {
+  let { userId } = req.params;
+  let { gameId } = req.params;
+
+  Users.findUserEXPForGameById(userId, gameId)
+    .then(response => {
+      res.status(200).json(response);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: `There was an error getting this user's experience points for this specific game`
+      });
+    });
+});
+
 module.exports = router;

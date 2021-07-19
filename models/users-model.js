@@ -185,8 +185,10 @@ function findUserEXPForAllGames(userId) {
     .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
     .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
+    .leftOuterJoin('games as g', 'c.game_id', 'g.id')
     .where('uc.user_id', userId)
     .where('uc.completed', true)
+    .where('g.public', true)
     .select([
       'c.id as challenge_id',
       'c.name as challenge_name',
@@ -198,7 +200,33 @@ function findUserEXPForAllGames(userId) {
       completedChallenges.map(completedChallenge => {
         totalExperiencePoints += completedChallenge.points
       })
-      return { experience_points: totalExperiencePoints }
+      return totalExperiencePoints
+    })
+}
+
+//FIND A USER'S TOTAL EXPERIENCE POINTS FOR A SPECIFIC GAME
+function findUserEXPForGameById(userId, gameId) {
+  return db('userChallenges as uc')
+    .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
+    .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+    .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
+    .leftOuterJoin('games as g', 'c.game_id', 'g.id')
+    .where('uc.user_id', userId)
+    .where('uc.completed', true)
+    .where('c.game_id', gameId)
+    .where('g.public', true)
+    .select([
+      'c.id as challenge_id',
+      'c.name as challenge_name',
+      'd.points'
+    ])
+    .then(completedChallenges => {
+      let totalExperiencePoints = 0
+
+      completedChallenges.map(completedChallenge => {
+        totalExperiencePoints += completedChallenge.points
+      })
+      return totalExperiencePoints
     })
 }
 
@@ -217,5 +245,6 @@ module.exports = {
   updateUserById,
   findIfUserEmailExists,
   findIfUserNameExists,
-  findUserEXPForAllGames
+  findUserEXPForAllGames,
+  findUserEXPForGameById
 };
