@@ -309,6 +309,7 @@ function findChallengeById(challengeId) {
       'u.profile_color_one',
       'u.profile_color_two',
       'g.name as game_title',
+      'g.id as game_id',
       'g.banner_pic_URL',
       's.name as system',
       's.id as system_id',
