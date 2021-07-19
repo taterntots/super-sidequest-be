@@ -4,6 +4,16 @@ const db = require('../data/dbConfig.js');
 function findUsers() {
   return db('users')
     .orderBy('username', 'asc')
+    .then(users => {
+      return Promise.all(users.map(user => {
+        return findUserEXPForAllGames(user.id).then(userEXP => {
+          return {
+            ...user,
+            total_experience_points: userEXP
+          }
+        })
+      }))
+    })
 }
 
 //FIND USER BY ID
