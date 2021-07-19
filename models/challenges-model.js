@@ -781,34 +781,47 @@ function findUserCompletedChallengeTotal(userId) {
   return db('userChallenges as uc')
     .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
+    .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
     .where('uc.user_id', userId)
     .where('uc.completed', true)
-    .select('g.name')
+    .where('g.public', true)
+    .select([
+      'g.name',
+      'd.points'
+    ])
     .orderBy('g.name', 'asc')
     .then(userChallenges => {
-      gameStatsHash = {}
+      gameCompleteTotalHash = {}
+      gameLevelHash = {}
       gameStats = []
 
       // Map through user challenges, counting the number of completed challenges and adding them as key/values
       userChallenges.map(userChallenge => {
-        if (gameStatsHash.hasOwnProperty(userChallenge.name)) {
-          gameStatsHash[userChallenge.name] += 1
-
+        if (gameCompleteTotalHash.hasOwnProperty(userChallenge.name)) {
+          gameCompleteTotalHash[userChallenge.name] += 1
         } else {
-          gameStatsHash[userChallenge.name] = 1
+          gameCompleteTotalHash[userChallenge.name] = 1
+        }
+
+        // Map through user challegnes, finding total number of experience points for each game
+        if (gameLevelHash.hasOwnProperty(userChallenge.name)) {
+          gameLevelHash[userChallenge.name] += userChallenge.points
+        } else {
+          gameLevelHash[userChallenge.name] = userChallenge.points
         }
       })
 
-      // Sort our stats object by highest value first
+      // Sort our stats object by highest experience level first
       const sortable = Object.fromEntries(
-        Object.entries(gameStatsHash).sort(([, a], [, b]) => b - a)
+        Object.entries(gameLevelHash).sort(([, a], [, b]) => b - a)
       );
 
       // Turn object into an array of objects, each holding a single game and its stats
       for (const [key, value] of Object.entries(sortable)) {
         gameStats.push({
           game: key,
-          total_challenges_completed: value
+          total_challenges_completed: gameCompleteTotalHash[key],
+          total_points: value
         })
       }
 
