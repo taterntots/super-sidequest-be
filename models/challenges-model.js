@@ -488,6 +488,7 @@ function findUserCompletedChallenges(userId, sortOption) {
       'u.username',
       'c.user_id',
       'g.name as game_title',
+      'g.id as game_id',
       'g.banner_pic_URL',
       's.name as system',
       'd.name as difficulty',
