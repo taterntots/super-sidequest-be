@@ -5,12 +5,20 @@ function findUsers() {
   return db('users')
     .orderBy('username', 'asc')
     .then(users => {
+      // Map through users, finding total experience points and total number of created challenges for each user
       return Promise.all(users.map(user => {
         return findUserEXPForAllGames(user.id).then(userEXP => {
-          return {
-            ...user,
-            total_experience_points: userEXP
-          }
+          return db('challenges as c')
+            .leftOuterJoin('games as g', 'c.game_id', 'g.id')
+            .where('c.user_id', user.id)
+            .where('g.public', true)
+            .then(userCreatedChallenges => {
+              return {
+                ...user,
+                total_experience_points: userEXP,
+                total_created_challenges: userCreatedChallenges.length
+              }
+            })
         })
       }))
     })
