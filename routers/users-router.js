@@ -3,7 +3,7 @@ const Users = require('../models/users-model.js')
 const Challenges = require('../models/challenges-model.js')
 const { validateUserId, validateFollowerId, validateUsername, checkForUserData, restrictedUser, restrictedAdmin } = require('../middleware/index.js');
 
-//*************** GET ALL USERS *****************//
+//*************** GET ALL USERS WITH TOTAL EXPERIENCE POINTS *****************//
 router.get('/', restrictedAdmin, (req, res) => {
   Users.findUsers()
     .then(users => {
@@ -13,6 +13,23 @@ router.get('/', restrictedAdmin, (req, res) => {
       console.log(err);
       res.status(500).json({
         error: 'There was an error getting all users to display'
+      });
+    });
+});
+
+
+//*************** GET ALL USERS WITH SPECIFIC GAME TOTAL EXPERIENCE POINTS *****************//
+router.get('/games/:gameId', restrictedAdmin, (req, res) => {
+  const { gameId } = req.params;
+
+  Users.findUsersWithTotalGameEXP(gameId)
+    .then(users => {
+      res.json(users);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all users with game experience points to display'
       });
     });
 });

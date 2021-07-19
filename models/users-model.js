@@ -1,6 +1,6 @@
 const db = require('../data/dbConfig.js');
 
-//FIND ALL USERS
+//FIND ALL USERS WITH TOTAL EXPERIENCE POINTS
 function findUsers() {
   return db('users')
     .orderBy('username', 'asc')
@@ -17,6 +17,31 @@ function findUsers() {
                 ...user,
                 total_experience_points: userEXP,
                 total_created_challenges: userCreatedChallenges.length
+              }
+            })
+        })
+      }))
+    })
+}
+
+//FIND ALL USERS WITH SPECIFIC GAME TOTAL EXPERIENCE POINTS
+function findUsersWithTotalGameEXP(gameId) {
+  return db('users')
+    .orderBy('username', 'asc')
+    .then(users => {
+      // Map through users, finding total experience points and total number of created challenges for each user for a specific game
+      return Promise.all(users.map(user => {
+        return findUserEXPForGameById(user.id, gameId).then(useGameEXP => {
+          return db('challenges as c')
+            .leftOuterJoin('games as g', 'c.game_id', 'g.id')
+            .where('c.user_id', user.id)
+            .where('c.game_id', gameId)
+            .where('g.public', true)
+            .then(userCreatedGameChallenges => {
+              return {
+                ...user,
+                total_experience_points: useGameEXP,
+                total_created_challenges: userCreatedGameChallenges.length
               }
             })
         })
@@ -268,6 +293,7 @@ function findUserEXPForGameById(userId, gameId) {
 
 module.exports = {
   findUsers,
+  findUsersWithTotalGameEXP,
   findUserById,
   findUserByUsername,
   findUserAdminStatus,
