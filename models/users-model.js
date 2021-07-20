@@ -26,12 +26,12 @@ function findUsers() {
 
 //FIND ALL USERS WITH SPECIFIC GAME TOTAL EXPERIENCE POINTS
 function findUsersWithTotalGameEXP(gameId) {
-  return db('users')
+  return db('users as u')
     .orderBy('username', 'asc')
     .then(users => {
       // Map through users, finding total experience points and total number of created challenges for each user for a specific game
       return Promise.all(users.map(user => {
-        return findUserEXPForGameById(user.id, gameId).then(useGameEXP => {
+        return findUserEXPForGameById(user.id, gameId).then(userGameEXP => {
           return db('challenges as c')
             .leftOuterJoin('games as g', 'c.game_id', 'g.id')
             .where('c.user_id', user.id)
@@ -40,12 +40,16 @@ function findUsersWithTotalGameEXP(gameId) {
             .then(userCreatedGameChallenges => {
               return {
                 ...user,
-                total_experience_points: useGameEXP,
+                total_experience_points: userGameEXP,
                 total_created_challenges: userCreatedGameChallenges.length
               }
             })
         })
       }))
+        // Filter the list to get rid of users with zero EXP
+        .then(allUsersWithEXP => {
+          return allUsersWithEXP.filter(filteredUser => filteredUser.total_experience_points > 0)
+        })
     })
 }
 
