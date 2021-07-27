@@ -108,7 +108,28 @@ function validateUsername(req, res, next) {
     .catch(error => {
       res.status(500).json({
         errorMessage:
-          'Could not validate user information for the specified ID'
+          'Could not validate user information for the specified username'
+      });
+    });
+}
+
+function validateEmail(req, res, next) {
+  const { email } = req.params;
+
+  Users.findUsersBy({ email })
+    .then(user => {
+      if (user.length > 0) {
+        next();
+      } else {
+        res.status(404).json({
+          errorMessage: 'The user with the specified email does not exist'
+        });
+      }
+    })
+    .catch(error => {
+      res.status(500).json({
+        errorMessage:
+          'Could not validate user information for the specified email'
       });
     });
 }
@@ -151,6 +172,28 @@ function checkForUserData(req, res, next) {
         });
       });
   }
+}
+
+function checkVerificationCodeValidity(req, res, next) {
+  const { code, email } = req.params;
+
+  Users.findUserByEmail(email)
+    .then(user => {
+      // COMPARE USER TYPED VERIFICATION CODE WITH THE ONE SENT VIA EMAIL. IF THEY MATCH, CONTINUE
+      if (JSON.stringify(user.verification_code) === code) {
+        next();
+      } else {
+        res.status(404).json({
+          errorMessage: 'Verification code is invalid'
+        });
+      }
+    })
+    .catch(error => {
+      res.status(500).json({
+        errorMessage:
+          'Could not compare verification codes'
+      });
+    });
 }
 
 //*************** GAMES ROUTER *****************//
@@ -416,7 +459,9 @@ module.exports = {
   validateUserId,
   validateFollowerId,
   validateUsername,
+  validateEmail,
   checkForUserData,
+  checkVerificationCodeValidity,
   validateGameId,
   checkForGameData,
   validateSystemId,

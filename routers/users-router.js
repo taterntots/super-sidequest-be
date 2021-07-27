@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const Users = require('../models/users-model.js')
 const Challenges = require('../models/challenges-model.js')
-const { validateUserId, validateFollowerId, validateUsername, checkForUserData, restrictedUser, restrictedAdmin } = require('../middleware/index.js');
+const { validateUserId, validateFollowerId, validateUsername, validateEmail, checkForUserData, restrictedUser, restrictedAdmin } = require('../middleware/index.js');
 
 //*************** GET ALL USERS WITH TOTAL EXPERIENCE POINTS *****************//
 router.get('/', restrictedAdmin, (req, res) => {
@@ -55,6 +55,22 @@ router.get('/username/:username', validateUsername, restrictedAdmin, (req, res) 
   const { username } = req.params;
 
   Users.findUserByUsername(username)
+    .then(user => {
+      res.json(user);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting this user'
+      });
+    });
+});
+
+//*************** GET USER BY EMAIL *****************//
+router.get('/email/:email', validateEmail, restrictedAdmin, (req, res) => {
+  const { email } = req.params;
+
+  Users.findUserByEmail(email)
     .then(user => {
       res.json(user);
     })

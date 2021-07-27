@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const { jwtSecret } = require('../config/secret.js');
 const sgMail = require('@sendgrid/mail');
 const Users = require('../models/users-model.js')
-const { checkForUserData } = require('../middleware/index.js');
+const { checkForUserData, checkVerificationCodeValidity } = require('../middleware/index.js');
 
 const sendGridKey = process.env.SENDGRID_KEY;
 const resetSecret = process.env.JWT_SECRET;
@@ -15,6 +15,7 @@ router.post('/signup', checkForUserData, (req, res) => {
   let user = req.body;
   const hash = bcrypt.hashSync(user.password, 3);
   user.password = hash;
+  user.verification_code = Math.floor(100000 + Math.random() * 900000) // random six digit number
 
   Users.addUser(user)
     .then(newUser => {
@@ -126,6 +127,27 @@ router.patch('/reset-password/:token', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 })
+
+//*************** VERIFY *****************//
+
+router.post('/verify/:email/:code', checkVerificationCodeValidity, (req, res) => {
+  let { email } = req.params;
+
+  Users.verifyUser(email)
+    .then(newUser => {
+      const token = signToken(newUser);
+      const { id, username, email } = newUser;
+      setTimeout(function () { // Give it some loading time
+        res.status(201).json({ id, username, email, token });
+      }, 2000)
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error verifying this user'
+      });
+    });
+});
 
 //*************** SEND CONTACT EMAIL *****************//
 

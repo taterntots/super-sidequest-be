@@ -67,6 +67,13 @@ function findUserByUsername(username) {
     .first()
 }
 
+//FIND USER BY EMAIL
+function findUserByEmail(email) {
+  return db('users as u')
+    .where('u.email', email)
+    .first()
+}
+
 //FIND ALL OF A USER'S FOLLOWERS
 function findAllUserFollowers(userId) {
   return db('userFollowers as uf')
@@ -121,6 +128,17 @@ function addUser(user) {
     .then(([id]) => {
       return findUserById(id);
     });
+}
+
+//VERIFY A USER
+function verifyUser(email) {
+  return db('users as u')
+    .where('u.email', email)
+    .first()
+    .update({ is_verified: true })
+    .then(user => {
+      return findUserByEmail(email)
+    })
 }
 
 //DELETE A USER FROM THE DATABASE
@@ -300,10 +318,12 @@ module.exports = {
   findUsersWithTotalGameEXP,
   findUserById,
   findUserByUsername,
+  findUserByEmail,
   findUserAdminStatus,
   findAllUserFollowers,
   findUsersBy,
   addUser,
+  verifyUser,
   removeUserById,
   followUser,
   unfollowUser,
