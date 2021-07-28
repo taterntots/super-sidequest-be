@@ -3,34 +3,49 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { jwtSecret } = require('../config/secret.js');
 const sgMail = require('@sendgrid/mail');
+const Verifier = require('email-verifier');
 const Users = require('../models/users-model.js')
 const { checkForUserData, checkVerificationCodeValidity } = require('../middleware/index.js');
 
 const sendGridKey = process.env.SENDGRID_KEY;
 const resetSecret = process.env.JWT_SECRET;
+const emailVerificationKey = process.env.EMAIL_VERIFICATION_KEY;
 
 //*************** SIGNUP *****************//
 
 router.post('/signup', checkForUserData, (req, res) => {
   let user = req.body;
   const hash = bcrypt.hashSync(user.password, 3);
+  let verifier = new Verifier(emailVerificationKey);
   user.password = hash;
   user.verification_code = Math.floor(100000 + Math.random() * 900000) // random six digit number
 
-  Users.addUser(user)
-    .then(newUser => {
-      const token = signToken(newUser);
-      const { id, username, email } = newUser;
-      setTimeout(function () { // Give it some loading time
-        res.status(201).json({ id, username, email, token });
-      }, 2000)
-    })
-    .catch(err => {
-      console.log(err);
-      res.status(500).json({
-        error: 'There was an error signing up this user to the database'
-      });
-    });
+  // Check that the email is real before adding to the database
+  verifier.verify(user.email, (err, data) => {
+    if (err) {
+      res.status(500).json('Could not verify if email address is real');
+    } else if (data.formatCheck === 'true' && data.smtpCheck === 'true' && data.dnsCheck === 'true' && data.disposableCheck === 'false') {
+
+      // If the user email address is real, add them to the database
+      Users.addUser(user)
+        .then(newUser => {
+          const token = signToken(newUser);
+          const { id, username, email } = newUser;
+          setTimeout(function () { // Give it some loading time
+            res.status(201).json({ id, username, email, token });
+          }, 2000)
+        })
+        .catch(err => {
+          console.log(err);
+          res.status(500).json({
+            error: 'There was an error signing up this user to the database'
+          });
+        });
+    } else {
+      res.status(404).json('Email address is not real');
+    }
+  });
+
 });
 
 //*************** LOGIN *****************//
