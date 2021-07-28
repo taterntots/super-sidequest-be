@@ -23,7 +23,7 @@ router.post('/signup', checkForUserData, (req, res) => {
   // Check that the email is real before adding to the database
   verifier.verify(user.email, (err, data) => {
     if (err) {
-      res.status(500).json('Could not verify if email address is real');
+      res.status(500).json({ errorMessage: 'Could not verify if email address is real' });
     } else if (data.formatCheck === 'true' && data.smtpCheck === 'true' && data.dnsCheck === 'true' && data.disposableCheck === 'false') {
 
       // If the user email address is real, add them to the database
@@ -31,6 +31,7 @@ router.post('/signup', checkForUserData, (req, res) => {
         .then(newUser => {
           const token = signToken(newUser);
           const { id, username, email } = newUser;
+          sendVerificationEmail(newUser, user.verification_code);
           setTimeout(function () { // Give it some loading time
             res.status(201).json({ id, username, email, token });
           }, 2000)
@@ -38,11 +39,11 @@ router.post('/signup', checkForUserData, (req, res) => {
         .catch(err => {
           console.log(err);
           res.status(500).json({
-            error: 'There was an error signing up this user to the database'
+            errorMessage: 'There was an error signing up this user to the database'
           });
         });
     } else {
-      res.status(404).json('Email address is not real');
+      res.status(404).json({ errorMessage: 'Email address does not exist / is not real' });
     }
   });
 
@@ -208,7 +209,26 @@ function sendPasswordEmail(user, token) {
     from: "taterntots.twitch@gmail.com",
     subject: "Reset password requested",
     html: `
-     <a href="${process.env.SITE_URL}reset-password/?key=${token}">Click here to enter new password</a>
+      <a href="${process.env.SITE_URL}reset-password/?key=${token}">Click here to enter new password</a>
+   `
+  };
+  sgMail.send(msg)
+    .then(() => {
+      console.log("Email sent");
+    }).catch((error) => {
+      console.error("Email failed to send");
+    })
+}
+
+function sendVerificationEmail(user, code) {
+  sgMail.setApiKey(sendGridKey);
+  const msg = {
+    to: user.email,
+    from: "taterntots.twitch@gmail.com",
+    subject: "Super Sidequest Verification Code",
+    html: `
+      <h1>Welcome to Super Sidequest!</h1>
+      <p>Your verification code: ${code}</p>
    `
   };
   sgMail.send(msg)

@@ -8,6 +8,9 @@ exports.up = function (knex) {
       .defaultTo(false);
     tbl
       .integer('verification_code');
+    tbl
+      .timestamp('verification_code_last_issued')
+      .defaultTo(knex.raw('now()'));
   });
 };
 
@@ -16,5 +19,6 @@ exports.down = function (knex) {
     tbl.dropColumn('is_verified');
     tbl.dropColumn('is_banned');
     tbl.dropColumn('verification_code');
+    tbl.dropColumn('verification_code_last_issued');
   });
 };
