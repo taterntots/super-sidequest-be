@@ -1,4 +1,5 @@
 const db = require('../data/dbConfig.js');
+const moment = require('moment')
 
 //FIND ALL USERS WITH TOTAL EXPERIENCE POINTS
 function findUsers() {
@@ -135,7 +136,28 @@ function verifyUser(email) {
   return db('users as u')
     .where('u.email', email)
     .first()
-    .update({ is_verified: true })
+    .then(user => {
+      // Only update the user if the code is still valid (not past the expiration date)
+      if (moment(user.verification_code_last_issued).add(1, 'hours').isAfter()) {
+        return db('users as u')
+          .where('u.email', email)
+          .first()
+          .update({ is_verified: true })
+          .then(updatedUser => {
+            return findUserByEmail(email)
+          })
+      } else {
+        return null
+      }
+    })
+}
+
+//RESEND ACCOUNT VERIFICATION CODE FOR A USER
+function updateUserAccountVerificationCode(email, code) {
+  return db('users as u')
+    .where('u.email', email)
+    .first()
+    .update({ verification_code: code, verification_code_last_issued: new Date() })
     .then(user => {
       return findUserByEmail(email)
     })
@@ -324,6 +346,7 @@ module.exports = {
   findUsersBy,
   addUser,
   verifyUser,
+  updateUserAccountVerificationCode,
   removeUserById,
   followUser,
   unfollowUser,

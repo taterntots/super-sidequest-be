@@ -149,23 +149,46 @@ router.patch('/reset-password/:token', async (req, res) => {
   }
 })
 
-//*************** VERIFY *****************//
+//*************** VERIFY ACCOUNT *****************//
 
 router.post('/verify/:email/:code', checkVerificationCodeValidity, (req, res) => {
   let { email } = req.params;
 
   Users.verifyUser(email)
     .then(newUser => {
-      const token = signToken(newUser);
-      const { id, username, email } = newUser;
-      setTimeout(function () { // Give it some loading time
-        res.status(201).json({ id, username, email, token });
-      }, 2000)
+      if (newUser) {
+        const token = signToken(newUser);
+        const { id, username, email } = newUser;
+        setTimeout(function () { // Give it some loading time
+          res.status(201).json({ id, username, email, token });
+        }, 2000)
+      } else {
+        res.status(404).json({errorMessage: 'Code has expired. Please request a new code'});
+      }
     })
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        error: 'There was an error verifying this user'
+        errorMessage: 'There was an error verifying this user'
+      });
+    });
+});
+
+//*************** RESEND VERIFICATION CODE *****************//
+
+router.post('/:email/resend-verification', (req, res) => {
+  let { email } = req.params;
+  let verificationCode = Math.floor(100000 + Math.random() * 900000) // random six digit number
+
+  Users.updateUserAccountVerificationCode(email, verificationCode)
+    .then(user => {
+      sendVerificationEmail(user, user.verification_code);
+      res.status(201).json({ message: 'Code sent! Please check your email' });
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        errorMessage: 'There was an error sending a new verification code'
       });
     });
 });
