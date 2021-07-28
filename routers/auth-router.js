@@ -163,7 +163,7 @@ router.post('/verify/:email/:code', checkVerificationCodeValidity, (req, res) =>
           res.status(201).json({ id, username, email, token });
         }, 2000)
       } else {
-        res.status(404).json({errorMessage: 'Code has expired. Please request a new code'});
+        res.status(404).json({ errorMessage: 'Code has expired. Please request a new code' });
       }
     })
     .catch(err => {
@@ -182,8 +182,12 @@ router.post('/:email/resend-verification', (req, res) => {
 
   Users.updateUserAccountVerificationCode(email, verificationCode)
     .then(user => {
-      sendVerificationEmail(user, user.verification_code);
-      res.status(201).json({ message: 'Code sent! Please check your email' });
+      if (user) {
+        sendVerificationEmail(user, user.verification_code);
+        res.status(201).json({ message: 'Code sent! Please check your email' });
+      } else {
+        res.status(404).json({ errorMessage: 'Too many code requests. Please wait a few minutes before trying again' });
+      }
     })
     .catch(err => {
       console.log(err);

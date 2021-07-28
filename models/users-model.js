@@ -157,9 +157,19 @@ function updateUserAccountVerificationCode(email, code) {
   return db('users as u')
     .where('u.email', email)
     .first()
-    .update({ verification_code: code, verification_code_last_issued: new Date() })
     .then(user => {
-      return findUserByEmail(email)
+      // To prevent spamming, only allow a code to be sent once every set amount of time
+      if (moment(user.verification_code_last_issued).add(5, 'minutes').isBefore()) {
+        return db('users as u')
+          .where('u.email', email)
+          .first()
+          .update({ verification_code: code, verification_code_last_issued: new Date() })
+          .then(updatedUser => {
+            return findUserByEmail(email)
+          })
+      } else {
+        return null
+      }
     })
 }
 
