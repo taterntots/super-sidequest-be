@@ -32,9 +32,7 @@ router.post('/signup', checkForUserData, (req, res) => {
           const token = signToken(newUser);
           const { id, username, email } = newUser;
           sendVerificationEmail(newUser, user.verification_code);
-          setTimeout(function () { // Give it some loading time
-            res.status(201).json({ id, username, email, token });
-          }, 2000)
+          res.status(201).json({ id, username, email, token });
         })
         .catch(err => {
           console.log(err);
