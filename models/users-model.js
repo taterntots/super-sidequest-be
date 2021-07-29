@@ -75,16 +75,16 @@ function findUserByEmail(email) {
     .first()
 }
 
-//FIND ALL OF A USER'S FOLLOWERS
-function findAllUserFollowers(userId) {
+//FIND ALL OF A USER'S FOLLOWINGS
+function findAllUserFollowings(userId) {
   return db('userFollowers as uf')
     .leftOuterJoin('users as u', 'uf.follower_id', 'u.id')
     .where('uf.user_id', userId)
     .select('u.*')
     .orderBy('u.username', 'asc')
-    .then(userFollowers => {
-      // Map through user followers, finding total experience points and total number of created challenges for each user
-      return Promise.all(userFollowers.map(user => {
+    .then(userFollowings => {
+      // Map through user followings (people following one user), finding total experience points and total number of created challenges for each user
+      return Promise.all(userFollowings.map(user => {
         return findUserEXPForAllGames(user.id).then(userEXP => {
           return db('challenges as c')
             .leftOuterJoin('games as g', 'c.game_id', 'g.id')
@@ -352,7 +352,7 @@ module.exports = {
   findUserByUsername,
   findUserByEmail,
   findUserAdminStatus,
-  findAllUserFollowers,
+  findAllUserFollowings,
   findUsersBy,
   addUser,
   verifyUser,

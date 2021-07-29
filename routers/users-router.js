@@ -98,18 +98,18 @@ router.get('/:userId/is-admin', validateUserId, restrictedAdmin, (req, res) => {
     });
 });
 
-//*************** GET ALL OF A USER'S FOLLOWERS *****************//
-router.get('/:userId/followers', validateUserId, restrictedAdmin, (req, res) => {
+//*************** GET ALL OF A USER'S FOLLOWINGS *****************//
+router.get('/:userId/followings', validateUserId, restrictedAdmin, (req, res) => {
   const { userId } = req.params;
 
-  Users.findAllUserFollowers(userId)
-    .then(userFollowers => {
-      res.json(userFollowers);
+  Users.findAllUserFollowings(userId)
+    .then(userFollowings => {
+      res.json(userFollowings);
     })
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        error: 'There was an error getting all the followers for this user'
+        error: 'There was an error getting all the users that this specified user is following'
       });
     });
 });
