@@ -114,6 +114,22 @@ router.get('/:userId/followings', validateUserId, restrictedAdmin, (req, res) =>
     });
 });
 
+//*************** GET ALL OF A USER'S FOLLOWERS *****************//
+router.get('/:userId/followers', validateUserId, restrictedAdmin, (req, res) => {
+  const { userId } = req.params;
+
+  Users.findAllUserFollowers(userId)
+    .then(userFollowers => {
+      res.json(userFollowers);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: `There was an error getting all the user's followers`
+      });
+    });
+});
+
 //*************** GET ALL OF A USER'S CREATED CHALLENGES *****************//
 router.get('/:userId/created-challenges/:sortOption', validateUserId, restrictedAdmin, (req, res) => {
   const { userId } = req.params;

@@ -83,8 +83,35 @@ function findAllUserFollowings(userId) {
     .select('u.*')
     .orderBy('u.username', 'asc')
     .then(userFollowings => {
-      // Map through user followings (people following one user), finding total experience points and total number of created challenges for each user
+      // Map through user followings (people the user follows), finding total experience points and total number of created challenges for each user
       return Promise.all(userFollowings.map(user => {
+        return findUserEXPForAllGames(user.id).then(userEXP => {
+          return db('challenges as c')
+            .leftOuterJoin('games as g', 'c.game_id', 'g.id')
+            .where('c.user_id', user.id)
+            .where('g.public', true)
+            .then(userCreatedChallenges => {
+              return {
+                ...user,
+                total_experience_points: userEXP,
+                total_created_challenges: userCreatedChallenges.length
+              }
+            })
+        })
+      }))
+    })
+}
+
+//FIND ALL OF A USER'S FOLLOWERS
+function findAllUserFollowers(userId) {
+  return db('userFollowers as uf')
+    .leftOuterJoin('users as u', 'uf.user_id', 'u.id')
+    .where('uf.follower_id', userId)
+    .select('u.*')
+    .orderBy('u.username', 'asc')
+    .then(userFollowers => {
+      // Map through user followers (people who follow the user), finding total experience points and total number of created challenges for each user
+      return Promise.all(userFollowers.map(user => {
         return findUserEXPForAllGames(user.id).then(userEXP => {
           return db('challenges as c')
             .leftOuterJoin('games as g', 'c.game_id', 'g.id')
@@ -353,6 +380,7 @@ module.exports = {
   findUserByEmail,
   findUserAdminStatus,
   findAllUserFollowings,
+  findAllUserFollowers,
   findUsersBy,
   addUser,
   verifyUser,
