@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const Users = require('../models/users-model.js')
 const Challenges = require('../models/challenges-model.js')
-const { validateUserId, validateFollowerId, validateUsername, checkForUserData, restrictedUser, restrictedAdmin } = require('../middleware/index.js');
+const { validateUserId, validateFollowerId, validateUsername, validateEmail, checkForUserData, restrictedUser, restrictedAdmin } = require('../middleware/index.js');
 
 //*************** GET ALL USERS WITH TOTAL EXPERIENCE POINTS *****************//
 router.get('/', restrictedAdmin, (req, res) => {
@@ -66,6 +66,22 @@ router.get('/username/:username', validateUsername, restrictedAdmin, (req, res) 
     });
 });
 
+//*************** GET USER BY EMAIL *****************//
+router.get('/email/:email', validateEmail, restrictedAdmin, (req, res) => {
+  const { email } = req.params;
+
+  Users.findUserByEmail(email)
+    .then(user => {
+      res.json(user);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting this user'
+      });
+    });
+});
+
 //*************** FIND IF USER IS AN ADMIN *****************//
 router.get('/:userId/is-admin', validateUserId, restrictedAdmin, (req, res) => {
   const { userId } = req.params;
@@ -82,6 +98,22 @@ router.get('/:userId/is-admin', validateUserId, restrictedAdmin, (req, res) => {
     });
 });
 
+//*************** GET ALL OF A USER'S FOLLOWINGS *****************//
+router.get('/:userId/followings', validateUserId, restrictedAdmin, (req, res) => {
+  const { userId } = req.params;
+
+  Users.findAllUserFollowings(userId)
+    .then(userFollowings => {
+      res.json(userFollowings);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all the users that this specified user is following'
+      });
+    });
+});
+
 //*************** GET ALL OF A USER'S FOLLOWERS *****************//
 router.get('/:userId/followers', validateUserId, restrictedAdmin, (req, res) => {
   const { userId } = req.params;
@@ -93,7 +125,7 @@ router.get('/:userId/followers', validateUserId, restrictedAdmin, (req, res) => 
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        error: 'There was an error getting all the followers for this user'
+        error: `There was an error getting all the user's followers`
       });
     });
 });

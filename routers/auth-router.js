@@ -3,33 +3,48 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { jwtSecret } = require('../config/secret.js');
 const sgMail = require('@sendgrid/mail');
+const Verifier = require('email-verifier');
 const Users = require('../models/users-model.js')
-const { checkForUserData } = require('../middleware/index.js');
+const { checkForUserData, checkVerificationCodeValidity } = require('../middleware/index.js');
 
 const sendGridKey = process.env.SENDGRID_KEY;
 const resetSecret = process.env.JWT_SECRET;
+const emailVerificationKey = process.env.EMAIL_VERIFICATION_KEY;
 
 //*************** SIGNUP *****************//
 
 router.post('/signup', checkForUserData, (req, res) => {
   let user = req.body;
   const hash = bcrypt.hashSync(user.password, 3);
+  let verifier = new Verifier(emailVerificationKey);
   user.password = hash;
+  user.verification_code = Math.floor(100000 + Math.random() * 900000) // random six digit number
 
-  Users.addUser(user)
-    .then(newUser => {
-      const token = signToken(newUser);
-      const { id, username, email } = newUser;
-      setTimeout(function () { // Give it some loading time
-        res.status(201).json({ id, username, email, token });
-      }, 2000)
-    })
-    .catch(err => {
-      console.log(err);
-      res.status(500).json({
-        error: 'There was an error signing up this user to the database'
-      });
-    });
+  // Check that the email is real before adding to the database
+  verifier.verify(user.email, (err, data) => {
+    if (err) {
+      res.status(500).json({ errorMessage: 'Could not verify if email address is real' });
+    } else if (data.formatCheck === 'true' && data.smtpCheck === 'true' && data.dnsCheck === 'true' && data.disposableCheck === 'false') {
+
+      // If the user email address is real, add them to the database
+      Users.addUser(user)
+        .then(newUser => {
+          const token = signToken(newUser);
+          const { id, username, email } = newUser;
+          sendVerificationEmail(newUser, user.verification_code);
+          res.status(201).json({ id, username, email, token });
+        })
+        .catch(err => {
+          console.log(err);
+          res.status(500).json({
+            errorMessage: 'There was an error signing up this user to the database'
+          });
+        });
+    } else {
+      res.status(404).json({ errorMessage: 'Email address does not exist / is not real' });
+    }
+  });
+
 });
 
 //*************** LOGIN *****************//
@@ -40,12 +55,17 @@ router.post('/login', (req, res) => {
   Users.findUsersBy({ email })
     .first()
     .then(user => {
-      if (user && bcrypt.compareSync(password, user.password)) {
+      // If the user exists, passwords match, and has verified their email, log 'em in!
+      if (user && bcrypt.compareSync(password, user.password) && user.is_verified) {
         setTimeout(function () { // Give it some loading time
           const token = signToken(user);
           const { id, username, email } = user;
           res.status(200).json({ id, username, email, token });
         }, 2000)
+        // Otherwise, if the user exists, passwords match, and has NOT verified their email, 
+      } else if (user && bcrypt.compareSync(password, user.password) && !user.is_verified) {
+        res.status(401).json({ message: 'Please verify your account' });
+        // Otherwise, email and password don't match, or the user does not exist
       } else {
         res.status(401).json({ message: 'Email address does not exist or password does not match' });
       }
@@ -127,6 +147,54 @@ router.patch('/reset-password/:token', async (req, res) => {
   }
 })
 
+//*************** VERIFY ACCOUNT *****************//
+
+router.post('/verify/:email/:code', checkVerificationCodeValidity, (req, res) => {
+  let { email } = req.params;
+
+  Users.verifyUser(email)
+    .then(newUser => {
+      if (newUser) {
+        const token = signToken(newUser);
+        const { id, username, email } = newUser;
+        setTimeout(function () { // Give it some loading time
+          res.status(201).json({ id, username, email, token });
+        }, 2000)
+      } else {
+        res.status(404).json({ errorMessage: 'Code has expired. Please request a new code' });
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        errorMessage: 'There was an error verifying this user'
+      });
+    });
+});
+
+//*************** RESEND VERIFICATION CODE *****************//
+
+router.post('/:email/resend-verification', (req, res) => {
+  let { email } = req.params;
+  let verificationCode = Math.floor(100000 + Math.random() * 900000) // random six digit number
+
+  Users.updateUserAccountVerificationCode(email, verificationCode)
+    .then(user => {
+      if (user) {
+        sendVerificationEmail(user, user.verification_code);
+        res.status(201).json({ message: 'Code sent! Please check your email' });
+      } else {
+        res.status(404).json({ errorMessage: 'Too many code requests. Please wait a few minutes before trying again' });
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        errorMessage: 'There was an error sending a new verification code'
+      });
+    });
+});
+
 //*************** SEND CONTACT EMAIL *****************//
 
 router.patch('/contact-email', async (req, res) => {
@@ -166,7 +234,26 @@ function sendPasswordEmail(user, token) {
     from: "taterntots.twitch@gmail.com",
     subject: "Reset password requested",
     html: `
-     <a href="${process.env.SITE_URL}reset-password/?key=${token}">Click here to enter new password</a>
+      <a href="${process.env.SITE_URL}reset-password/?key=${token}">Click here to enter new password</a>
+   `
+  };
+  sgMail.send(msg)
+    .then(() => {
+      console.log("Email sent");
+    }).catch((error) => {
+      console.error("Email failed to send");
+    })
+}
+
+function sendVerificationEmail(user, code) {
+  sgMail.setApiKey(sendGridKey);
+  const msg = {
+    to: user.email,
+    from: "taterntots.twitch@gmail.com",
+    subject: "Super Sidequest Verification Code",
+    html: `
+      <h1>Welcome to Super Sidequest!</h1>
+      <p>Your verification code: ${code}</p>
    `
   };
   sgMail.send(msg)

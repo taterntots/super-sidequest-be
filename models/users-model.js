@@ -1,4 +1,5 @@
 const db = require('../data/dbConfig.js');
+const moment = require('moment')
 
 //FIND ALL USERS WITH TOTAL EXPERIENCE POINTS
 function findUsers() {
@@ -67,15 +68,49 @@ function findUserByUsername(username) {
     .first()
 }
 
-//FIND ALL OF A USER'S FOLLOWERS
-function findAllUserFollowers(userId) {
+//FIND USER BY EMAIL
+function findUserByEmail(email) {
+  return db('users as u')
+    .where('u.email', email)
+    .first()
+}
+
+//FIND ALL OF A USER'S FOLLOWINGS
+function findAllUserFollowings(userId) {
   return db('userFollowers as uf')
     .leftOuterJoin('users as u', 'uf.follower_id', 'u.id')
     .where('uf.user_id', userId)
     .select('u.*')
     .orderBy('u.username', 'asc')
+    .then(userFollowings => {
+      // Map through user followings (people the user follows), finding total experience points and total number of created challenges for each user
+      return Promise.all(userFollowings.map(user => {
+        return findUserEXPForAllGames(user.id).then(userEXP => {
+          return db('challenges as c')
+            .leftOuterJoin('games as g', 'c.game_id', 'g.id')
+            .where('c.user_id', user.id)
+            .where('g.public', true)
+            .then(userCreatedChallenges => {
+              return {
+                ...user,
+                total_experience_points: userEXP,
+                total_created_challenges: userCreatedChallenges.length
+              }
+            })
+        })
+      }))
+    })
+}
+
+//FIND ALL OF A USER'S FOLLOWERS
+function findAllUserFollowers(userId) {
+  return db('userFollowers as uf')
+    .leftOuterJoin('users as u', 'uf.user_id', 'u.id')
+    .where('uf.follower_id', userId)
+    .select('u.*')
+    .orderBy('u.username', 'asc')
     .then(userFollowers => {
-      // Map through user followers, finding total experience points and total number of created challenges for each user
+      // Map through user followers (people who follow the user), finding total experience points and total number of created challenges for each user
       return Promise.all(userFollowers.map(user => {
         return findUserEXPForAllGames(user.id).then(userEXP => {
           return db('challenges as c')
@@ -121,6 +156,48 @@ function addUser(user) {
     .then(([id]) => {
       return findUserById(id);
     });
+}
+
+//VERIFY A USER
+function verifyUser(email) {
+  return db('users as u')
+    .where('u.email', email)
+    .first()
+    .then(user => {
+      // Only update the user if the code is still valid (not past the expiration date)
+      if (moment(user.verification_code_last_issued).add(1, 'hours').isAfter()) {
+        return db('users as u')
+          .where('u.email', email)
+          .first()
+          .update({ is_verified: true })
+          .then(updatedUser => {
+            return findUserByEmail(email)
+          })
+      } else {
+        return null
+      }
+    })
+}
+
+//RESEND ACCOUNT VERIFICATION CODE FOR A USER
+function updateUserAccountVerificationCode(email, code) {
+  return db('users as u')
+    .where('u.email', email)
+    .first()
+    .then(user => {
+      // To prevent spamming, only allow a code to be sent once every set amount of time
+      if (moment(user.verification_code_last_issued).add(5, 'minutes').isBefore()) {
+        return db('users as u')
+          .where('u.email', email)
+          .first()
+          .update({ verification_code: code, verification_code_last_issued: new Date() })
+          .then(updatedUser => {
+            return findUserByEmail(email)
+          })
+      } else {
+        return null
+      }
+    })
 }
 
 //DELETE A USER FROM THE DATABASE
@@ -300,10 +377,14 @@ module.exports = {
   findUsersWithTotalGameEXP,
   findUserById,
   findUserByUsername,
+  findUserByEmail,
   findUserAdminStatus,
+  findAllUserFollowings,
   findAllUserFollowers,
   findUsersBy,
   addUser,
+  verifyUser,
+  updateUserAccountVerificationCode,
   removeUserById,
   followUser,
   unfollowUser,

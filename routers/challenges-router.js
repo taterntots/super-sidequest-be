@@ -310,4 +310,21 @@ router.put('/:challengeId/users/:userId/featured', restrictedUser, validateChall
     });
 });
 
+//*************** RESET USER CHALLENGE PROGRESS *****************//
+router.put('/:challengeId/users/:userId/reset', restrictedUser, validateChallengeId, validateUserId, (req, res) => {
+  const challengeId = req.params.challengeId;
+  const userId = req.params.userId;
+
+  Challenges.resetUserChallengeProgress(challengeId, userId)
+    .then(response => {
+      res.status(200).json({ updatedUserChallengeProgress: response });
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        errorMessage: `There was an error resetting this user's challenge progress`
+      });
+    });
+});
+
 module.exports = router;

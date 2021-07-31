@@ -733,6 +733,31 @@ function updateUserChallengeProgress(challengeId, userId, changes) {
     })
 }
 
+//RESET USER CHALLENGE PROGRESS
+function resetUserChallengeProgress(challengeId, userId) {
+  return db('userChallenges as uc')
+    .where('uc.challenge_id', challengeId)
+    .where('uc.user_id', userId)
+    .update(
+      {
+        high_score: null,
+        speedrun_hours: null,
+        speedrun_minutes: null,
+        speedrun_seconds: null,
+        speedrun_milliseconds: null,
+        total_milliseconds: null,
+        completed: false,
+        is_active: false,
+        updated_at: new Date()
+      })
+    .then(userChallenge => {
+      return db('userChallenges as uc')
+        .where('uc.challenge_id', challengeId)
+        .where('uc.user_id', userId)
+        .first()
+    })
+}
+
 //UPDATE USER'S FEATURED CHALLENGE
 function updateUserFeaturedChallenge(challengeId, userId, changes) {
   if (!changes.featured) {
@@ -862,6 +887,7 @@ module.exports = {
   updateChallengeById,
   updateUserChallengeProgress,
   updateUserFeaturedChallenge,
+  resetUserChallengeProgress,
   findIfChallengeAlreadyAccepted,
   findUserCompletedChallengeTotal
 };
