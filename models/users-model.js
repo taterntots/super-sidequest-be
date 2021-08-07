@@ -1,5 +1,7 @@
 const db = require('../data/dbConfig.js');
 const moment = require('moment')
+var schedule = require('node-schedule');
+const { patreon } = require('patreon');
 
 //FIND ALL USERS WITH TOTAL EXPERIENCE POINTS
 function findUsers() {
@@ -372,6 +374,56 @@ function findUserEXPForGameById(userId, gameId) {
     })
 }
 
+//AUTOMATICALLY CHECKS AND UPDATES USER PATREON STATUS AT MIDNIGHT UTC EVERY DAY
+var rule = new schedule.RecurrenceRule();
+rule.hour = 23
+rule.minute = 59
+rule.second = 58
+rule.tz = 'Etc/UTC';
+
+schedule.scheduleJob(rule, function () {
+  // Remove patreon status from all users (needs to happen to uncheck anyone who may have stopped paying)
+  return db('users')
+    .update('is_patreon', false)
+    .then(allUsers => {
+      // Get a list of all current patreon member emails
+      return getPatreonEmails().then(pledgeEmails => {
+        // Map through the patreon emails, updating user patreon status if true
+        return pledgeEmails.map(pledgeEmail => {
+          return findUserByEmail(pledgeEmail).then(userWithPledge => {
+            if (userWithPledge && userWithPledge.is_patreon === false) {
+              console.log(`${pledgeEmail} is a patron!`)
+              return db('users')
+                .where('id', userWithPledge.id)
+                .update('is_patreon', true)
+            } else if (!userWithPledge) {
+              console.log(`${pledgeEmail} is not in our database`)
+            }
+          })
+        })
+      })
+    })
+})
+
+//GET PATRON EMAILS FOR USERS ABOVE A DOLLAR TIER
+const getPatreonEmails = async (data) => {
+  const api_client = patreon(process.env.PATREON_CREATOR_ACCESS_TOKEN)
+
+  return api_client(`/campaigns/${process.env.PATREON_CAMPAIGN_ID}/pledges?include=patron.null`)
+    .then(({ store }) => {
+      // Find all pledges over a dollar (any tier above base tier) and then return just the emails
+      let pledgesOverOneDollar = store.findAll('pledge').filter(fp => fp.serialize().data.attributes.amount_cents > 100)
+      let pledgeEmails = pledgesOverOneDollar.map(pledge_emails => pledge_emails.patron.email)
+
+      return pledgeEmails
+    })
+    .catch(err => {
+      res.status(500).json({
+        errorMessage: 'There was an error hitting the Patreon API'
+      });
+    })
+};
+
 module.exports = {
   findUsers,
   findUsersWithTotalGameEXP,
@@ -393,5 +445,6 @@ module.exports = {
   findIfUserEmailExists,
   findIfUserNameExists,
   findUserEXPForAllGames,
-  findUserEXPForGameById
+  findUserEXPForGameById,
+  getPatreonEmails
 };
