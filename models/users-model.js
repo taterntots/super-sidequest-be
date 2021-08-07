@@ -435,6 +435,24 @@ const getPatreonEmails = async (data) => {
     })
 };
 
+//AUTOMATICALLY DELETE ALL UNVERIFIED USERS AT THE END OF THE MONTH
+var rule2 = new schedule.RecurrenceRule();
+rule2.hour = 00
+rule2.minute = 00
+rule2.second = 00
+rule2.month = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] // MONTH STARTS JANUARY AT ZERO INDEX. YEAH, IT'S PRETTY DUMB
+rule2.date = 01
+rule2.tz = 'Etc/UTC';
+
+schedule.scheduleJob(rule2, function () {
+  return db('users')
+    .where('is_verified', false)
+    .del()
+    .then(res => {
+      console.log('All unverified users deleted')
+    })
+})
+
 module.exports = {
   findUsers,
   findUnverifiedUsers,
