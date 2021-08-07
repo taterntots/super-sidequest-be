@@ -3,9 +3,10 @@ const moment = require('moment')
 var schedule = require('node-schedule');
 const { patreon } = require('patreon');
 
-//FIND ALL USERS WITH TOTAL EXPERIENCE POINTS
+//FIND ALL VERIFIED USERS WITH TOTAL EXPERIENCE POINTS
 function findUsers() {
   return db('users')
+    .where('is_verified', true)
     .orderBy('username', 'asc')
     .then(users => {
       // Map through users, finding total experience points and total number of created challenges for each user
@@ -27,9 +28,17 @@ function findUsers() {
     })
 }
 
+//FIND ALL UNVERIFIED USERS
+function findUnverifiedUsers() {
+  return db('users')
+    .where('is_verified', false)
+    .orderBy('username', 'asc')
+}
+
 //FIND ALL USERS WITH SPECIFIC GAME TOTAL EXPERIENCE POINTS
 function findUsersWithTotalGameEXP(gameId) {
   return db('users as u')
+    .where('is_verified', true)
     .orderBy('username', 'asc')
     .then(users => {
       // Map through users, finding total experience points and total number of created challenges for each user for a specific game
@@ -82,6 +91,7 @@ function findAllUserFollowings(userId) {
   return db('userFollowers as uf')
     .leftOuterJoin('users as u', 'uf.follower_id', 'u.id')
     .where('uf.user_id', userId)
+    .where('is_verified', true)
     .select('u.*')
     .orderBy('u.username', 'asc')
     .then(userFollowings => {
@@ -109,6 +119,7 @@ function findAllUserFollowers(userId) {
   return db('userFollowers as uf')
     .leftOuterJoin('users as u', 'uf.user_id', 'u.id')
     .where('uf.follower_id', userId)
+    .where('is_verified', true)
     .select('u.*')
     .orderBy('u.username', 'asc')
     .then(userFollowers => {
@@ -188,7 +199,7 @@ function updateUserAccountVerificationCode(email, code) {
     .first()
     .then(user => {
       // To prevent spamming, only allow a code to be sent once every set amount of time
-      if (moment(user.verification_code_last_issued).add(5, 'minutes').isBefore()) {
+      if (moment(user.verification_code_last_issued).add(2, 'minutes').isBefore()) {
         return db('users as u')
           .where('u.email', email)
           .first()
@@ -426,6 +437,7 @@ const getPatreonEmails = async (data) => {
 
 module.exports = {
   findUsers,
+  findUnverifiedUsers,
   findUsersWithTotalGameEXP,
   findUserById,
   findUserByUsername,

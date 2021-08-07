@@ -12,11 +12,24 @@ router.get('/', restrictedAdmin, (req, res) => {
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        error: 'There was an error getting all users to display'
+        error: 'There was an error getting all verified users to display'
       });
     });
 });
 
+//*************** GET ALL UNVERIFIED USERS *****************//
+router.get('/all/unverified', restrictedAdmin, (req, res) => {
+  Users.findUnverifiedUsers()
+    .then(users => {
+      res.json(users);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all unverified users to display'
+      });
+    });
+});
 
 //*************** GET ALL USERS WITH SPECIFIC GAME TOTAL EXPERIENCE POINTS *****************//
 router.get('/games/:gameId', restrictedAdmin, (req, res) => {
