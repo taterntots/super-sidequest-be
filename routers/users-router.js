@@ -371,29 +371,19 @@ router.get('/patreon/emails', (req, res) => {
 const getEmails = async (data) => {
   const api_client = patreon('_E7fSxDIgKDb3o0VvGoFfLb9NfOjKPTMAekLSB0nGx4')
 
-  // return api_client('/current_user/campaigns')
-  //   .then(({ store }) => {
-  //     console.log(store)
-
-  //     let rewards = store.findAll('reward').map(reward => reward.serialize().data.attributes).filter(reward => reward.url)
-  //     let users = store.findAll('user').map(user => user.serialize().data.attributes).filter(user => user.url)
-      
-  //     return users
   return api_client('/campaigns/7244263/pledges?include=patron.null')
-  .then(({ store }) => {
-    console.log(store)
+    .then(({ store }) => {
+      // Find all pledges over a dollar (any tier above base tier) and then return just the emails
+      let pledgesOverOneDollar = store.findAll('pledge').filter(fp => fp.serialize().data.attributes.amount_cents > 100)
+      let pledgeEmails = pledgesOverOneDollar.map(pledge_emails => pledge_emails.patron.email)
 
-    // let rewards = store.findAll('reward').map(reward => reward.serialize().data.attributes).filter(reward => reward.url)
-    let users = store.findAll('user').map(user => user.serialize().data.attributes).filter(user => user.url)
-    
-    return users
+      return pledgeEmails
     })
     .catch(err => {
-      console.log(err)
-      // res.status(500).json({
-      //   errorMessage: 'There was an error getting all patreons'
-      // });
-    }) 
+      res.status(500).json({
+        errorMessage: 'There was an error hitting the Patreon API'
+      });
+    })
 };
 
 module.exports = router;
