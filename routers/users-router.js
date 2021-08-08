@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const { patreon } = require('patreon');
 const Users = require('../models/users-model.js')
 const Challenges = require('../models/challenges-model.js')
 const { validateUserId, validateFollowerId, validateUsername, validateEmail, checkForUserData, restrictedUser, restrictedAdmin } = require('../middleware/index.js');
@@ -13,11 +12,24 @@ router.get('/', restrictedAdmin, (req, res) => {
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        error: 'There was an error getting all users to display'
+        error: 'There was an error getting all verified users to display'
       });
     });
 });
 
+//*************** GET ALL UNVERIFIED USERS *****************//
+router.get('/all/unverified', restrictedAdmin, (req, res) => {
+  Users.findUnverifiedUsers()
+    .then(users => {
+      res.json(users);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all unverified users to display'
+      });
+    });
+});
 
 //*************** GET ALL USERS WITH SPECIFIC GAME TOTAL EXPERIENCE POINTS *****************//
 router.get('/games/:gameId', restrictedAdmin, (req, res) => {
@@ -356,7 +368,7 @@ router.get('/:userId/games/:gameId/exp', validateUserId, restrictedAdmin, (req, 
 //*************** FIND ALL PLEDGED PATRONS ON PATREON *****************//
 
 router.get('/patreon/emails', (req, res) => {
-  getEmails()
+  Users.getPatreonEmails()
     .then(emails => {
       res.status(200).json(emails);
     })
@@ -366,34 +378,5 @@ router.get('/patreon/emails', (req, res) => {
       });
     })
 });
-
-//*************** PATREON FUNCTIONS *****************//
-const getEmails = async (data) => {
-  const api_client = patreon('_E7fSxDIgKDb3o0VvGoFfLb9NfOjKPTMAekLSB0nGx4')
-
-  // return api_client('/current_user/campaigns')
-  //   .then(({ store }) => {
-  //     console.log(store)
-
-  //     let rewards = store.findAll('reward').map(reward => reward.serialize().data.attributes).filter(reward => reward.url)
-  //     let users = store.findAll('user').map(user => user.serialize().data.attributes).filter(user => user.url)
-      
-  //     return users
-  return api_client('/campaigns/7244263/pledges?include=patron.null')
-  .then(({ store }) => {
-    console.log(store)
-
-    // let rewards = store.findAll('reward').map(reward => reward.serialize().data.attributes).filter(reward => reward.url)
-    let users = store.findAll('user').map(user => user.serialize().data.attributes).filter(user => user.url)
-    
-    return users
-    })
-    .catch(err => {
-      console.log(err)
-      // res.status(500).json({
-      //   errorMessage: 'There was an error getting all patreons'
-      // });
-    }) 
-};
 
 module.exports = router;
