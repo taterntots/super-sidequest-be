@@ -248,10 +248,12 @@ router.delete('/:userId', validateUserId, restrictedAdmin, (req, res) => {
 
   Users.removeUserById(userId)
     .then(response => {
-      res.status(200).json({
-        success: `The user was successfully deleted`,
-        id: userId
-      });
+      setTimeout(function () { // Give it some loading time
+        res.status(200).json({
+          success: `The user was successfully deleted`,
+          id: userId
+        });
+      }, 2000)
     })
     .catch(err => {
       console.log(err);
