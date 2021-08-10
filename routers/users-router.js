@@ -17,6 +17,20 @@ router.get('/', restrictedAdmin, (req, res) => {
     });
 });
 
+//*************** GET ALL BANNED USERS WITH TOTAL EXPERIENCE POINTS *****************//
+router.get('/all/banned', restrictedAdmin, (req, res) => {
+  Users.findBannedUsers()
+    .then(users => {
+      res.json(users);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all banned users to display'
+      });
+    });
+});
+
 //*************** GET ALL UNVERIFIED USERS *****************//
 router.get('/all/unverified', restrictedAdmin, (req, res) => {
   Users.findUnverifiedUsers()

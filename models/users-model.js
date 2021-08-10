@@ -7,6 +7,32 @@ const { patreon } = require('patreon');
 function findUsers() {
   return db('users')
     .where('is_verified', true)
+    .where('is_banned', false)
+    .orderBy('username', 'asc')
+    .then(users => {
+      // Map through users, finding total experience points and total number of created challenges for each user
+      return Promise.all(users.map(user => {
+        return findUserEXPForAllGames(user.id).then(userEXP => {
+          return db('challenges as c')
+            .leftOuterJoin('games as g', 'c.game_id', 'g.id')
+            .where('c.user_id', user.id)
+            .where('g.public', true)
+            .then(userCreatedChallenges => {
+              return {
+                ...user,
+                total_experience_points: userEXP,
+                total_created_challenges: userCreatedChallenges.length
+              }
+            })
+        })
+      }))
+    })
+}
+
+//FIND ALL BANNED USERS WITH TOTAL EXPERIENCE POINTS
+function findBannedUsers() {
+  return db('users')
+    .where('is_banned', true)
     .orderBy('username', 'asc')
     .then(users => {
       // Map through users, finding total experience points and total number of created challenges for each user
@@ -455,6 +481,7 @@ schedule.scheduleJob(rule2, function () {
 
 module.exports = {
   findUsers,
+  findBannedUsers,
   findUnverifiedUsers,
   findUsersWithTotalGameEXP,
   findUserById,
