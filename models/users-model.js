@@ -64,8 +64,8 @@ function findUnverifiedUsers() {
 //FIND ALL USERS WITH SPECIFIC GAME TOTAL EXPERIENCE POINTS
 function findUsersWithTotalGameEXP(gameId) {
   return db('users as u')
-    .where('is_verified', true)
-    .where('is_banned', false)
+    .where('u.is_verified', true)
+    .where('u.is_banned', false)
     .orderBy('username', 'asc')
     .then(users => {
       // Map through users, finding total experience points and total number of created challenges for each user for a specific game
@@ -118,8 +118,8 @@ function findAllUserFollowings(userId) {
   return db('userFollowers as uf')
     .leftOuterJoin('users as u', 'uf.follower_id', 'u.id')
     .where('uf.user_id', userId)
-    .where('is_verified', true)
-    .where('is_banned', false)
+    .where('u.is_verified', true)
+    .where('u.is_banned', false)
     .select('u.*')
     .orderBy('u.username', 'asc')
     .then(userFollowings => {
@@ -147,8 +147,8 @@ function findAllUserFollowers(userId) {
   return db('userFollowers as uf')
     .leftOuterJoin('users as u', 'uf.user_id', 'u.id')
     .where('uf.follower_id', userId)
-    .where('is_verified', true)
-    .where('is_banned', false)
+    .where('u.is_verified', true)
+    .where('u.is_banned', false)
     .select('u.*')
     .orderBy('u.username', 'asc')
     .then(userFollowers => {
