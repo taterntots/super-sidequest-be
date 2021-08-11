@@ -65,6 +65,7 @@ function findUnverifiedUsers() {
 function findUsersWithTotalGameEXP(gameId) {
   return db('users as u')
     .where('is_verified', true)
+    .where('is_banned', false)
     .orderBy('username', 'asc')
     .then(users => {
       // Map through users, finding total experience points and total number of created challenges for each user for a specific game
