@@ -101,6 +101,7 @@ function findGameChallenges(gameId, userId) {
     .leftOuterJoin('systems as s', 'c.system_id', 's.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
     .where('c.game_id', gameId)
+    .where('u.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name',
@@ -172,6 +173,7 @@ function findGameChallengesByPopularity(gameId, userId) {
     .leftOuterJoin('systems as s', 'c.system_id', 's.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
     .where('c.game_id', gameId)
+    .where('u.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name',
@@ -247,6 +249,7 @@ function findGameChallengesByExpiration(gameId, userId) {
     .leftOuterJoin('systems as s', 'c.system_id', 's.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
     .where('c.game_id', gameId)
+    .where('u.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name',
