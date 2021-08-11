@@ -418,6 +418,20 @@ function findUserEXPForGameById(userId, gameId) {
     })
 }
 
+//FIND IF A USER IS BANNED
+function findIfUserBannedByUsername(username) {
+  return db('users as u')
+    .where('u.username', username)
+    .first()
+    .then(user => {
+      if (user.is_banned) {
+        return true
+      } else {
+        return false
+      }
+    })
+}
+
 //AUTOMATICALLY CHECKS AND UPDATES USER PATREON STATUS AT MIDNIGHT UTC EVERY DAY
 var rule = new schedule.RecurrenceRule();
 rule.hour = 23
@@ -510,5 +524,6 @@ module.exports = {
   findIfUserNameExists,
   findUserEXPForAllGames,
   findUserEXPForGameById,
+  findIfUserBannedByUsername,
   getPatreonEmails
 };

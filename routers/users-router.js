@@ -381,6 +381,22 @@ router.get('/:userId/games/:gameId/exp', validateUserId, restrictedAdmin, (req, 
     });
 });
 
+//*************** FIND OUT IF A USER IS BANNED *****************//
+router.get('/username/:username/banned', validateUsername, restrictedAdmin, (req, res) => {
+  let { username } = req.params;
+
+  Users.findIfUserBannedByUsername(username)
+    .then(response => {
+      res.status(200).json(response);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: `There was an error finding out whether this user is banned or not`
+      });
+    });
+});
+
 //*************** FIND ALL PLEDGED PATRONS ON PATREON *****************//
 
 router.get('/patreon/emails', (req, res) => {
