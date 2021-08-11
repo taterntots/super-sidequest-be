@@ -118,6 +118,7 @@ function findAllUserFollowings(userId) {
     .leftOuterJoin('users as u', 'uf.follower_id', 'u.id')
     .where('uf.user_id', userId)
     .where('is_verified', true)
+    .where('is_banned', false)
     .select('u.*')
     .orderBy('u.username', 'asc')
     .then(userFollowings => {
@@ -146,6 +147,7 @@ function findAllUserFollowers(userId) {
     .leftOuterJoin('users as u', 'uf.user_id', 'u.id')
     .where('uf.follower_id', userId)
     .where('is_verified', true)
+    .where('is_banned', false)
     .select('u.*')
     .orderBy('u.username', 'asc')
     .then(userFollowers => {
