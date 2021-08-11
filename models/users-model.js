@@ -368,11 +368,13 @@ function findUserEXPForAllGames(userId) {
   return db('userChallenges as uc')
     .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
     .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+    .leftOuterJoin('users as challenge_holder', 'c.user_id', 'challenge_holder.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
     .where('uc.user_id', userId)
     .where('uc.completed', true)
     .where('g.public', true)
+    .where('challenge_holder.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name as challenge_name',
@@ -393,12 +395,14 @@ function findUserEXPForGameById(userId, gameId) {
   return db('userChallenges as uc')
     .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
     .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+    .leftOuterJoin('users as challenge_holder', 'c.user_id', 'challenge_holder.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
     .where('uc.user_id', userId)
     .where('uc.completed', true)
     .where('c.game_id', gameId)
     .where('g.public', true)
+    .where('challenge_holder.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name as challenge_name',
