@@ -66,8 +66,8 @@ router.post('/login', (req, res) => {
       } else if (user && bcrypt.compareSync(password, user.password) && !user.is_verified && !user.is_banned) {
         res.status(401).json({ message: 'Please verify your account' });
         // Otherwise, if a user is banned, don't log them in
-      } else if (user.is_banned) {
-        res.status(401).json({ message: `User account is banned. You must be a real jerk to be seeing this.` });
+      } else if (user && bcrypt.compareSync(password, user.password) && user.is_banned) {
+        res.status(401).json({ message: `User account is banned. You must have been a real jerk to be seeing this.` });
         // Otherwise, email and password don't match, or the user does not exist
       } else {
         res.status(401).json({ message: 'Email address does not exist or password does not match' });
