@@ -411,4 +411,20 @@ router.get('/patreon/emails', (req, res) => {
     })
 });
 
+//*************** CHECK IF A USERNAME ALREADY EXISTS *****************//
+
+router.get('/username/:username/exists', (req, res) => {
+  let { username } = req.params;
+
+  Users.findIfUserNameExists(username)
+    .then(response => {
+      res.status(200).json(response);
+    })
+    .catch(err => {
+      res.status(500).json({
+        errorMessage: 'There was an error finding if the username already exists'
+      });
+    })
+});
+
 module.exports = router;
