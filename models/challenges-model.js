@@ -8,6 +8,7 @@ function findChallenges(userId) {
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
     .leftOuterJoin('systems as s', 'c.system_id', 's.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
+    .where('u.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name',
@@ -35,7 +36,10 @@ function findChallenges(userId) {
       // Loop through challenges, finding active users and attaching a completed bool if a user has accepted a challenge
       return Promise.all(challenges.map(challenge => {
         return db('userChallenges as uc')
+          .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
           .where('uc.challenge_id', challenge.challenge_id)
+          .where('u.is_banned', false)
+          .select('uc.*')
           .then(userChallenges => {
             if (userId !== 'no-user') {
               return db('userChallenges as uc')
@@ -78,6 +82,7 @@ function findRecentChallenges(userId) {
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
     .leftOuterJoin('systems as s', 'c.system_id', 's.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
+    .where('u.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name',
@@ -106,7 +111,10 @@ function findRecentChallenges(userId) {
       // Loop through recent challenges, finding active users and attaching a completed bool if a user has accepted a challenge
       return Promise.all(recentChallenges.map(recentChallenge => {
         return db('userChallenges as uc')
+          .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
           .where('uc.challenge_id', recentChallenge.challenge_id)
+          .where('u.is_banned', false)
+          .select('uc.*')
           .then(userChallenges => {
             if (userId !== 'no-user') {
               return db('userChallenges as uc')
@@ -149,6 +157,7 @@ function findAllChallengesByPopularity(userId) {
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
     .leftOuterJoin('systems as s', 'c.system_id', 's.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
+    .where('u.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name',
@@ -223,6 +232,7 @@ function findAllChallengesByExpiration(userId) {
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
     .leftOuterJoin('systems as s', 'c.system_id', 's.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
+    .where('u.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name',
@@ -370,8 +380,10 @@ function findUserCreatedChallenges(userId, sortOption) {
       // Loop through created challenges, finding active users and attaching a completed bool if a user has accepted a challenge
       return Promise.all(createdChallenges.map(createdChallenge => {
         return db('userChallenges as uc')
+          .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
           .where('uc.challenge_id', createdChallenge.challenge_id)
-          .then(userChallenges => {
+          .where('u.is_banned', false)
+          .select('uc.*').then(userChallenges => {
             return db('userChallenges as uc')
               .where('uc.challenge_id', createdChallenge.challenge_id)
               .where('uc.user_id', createdChallenge.user_id)
@@ -419,6 +431,7 @@ function findUserAcceptedChallenges(userId, sortOption) {
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
     .where('uc.user_id', userId)
     .where('completed', false)
+    .where('u.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name',
@@ -448,7 +461,10 @@ function findUserAcceptedChallenges(userId, sortOption) {
       // Loop through accepted challenges, finding active users
       return Promise.all(acceptedChallenges.map(acceptedChallenge => {
         return db('userChallenges as uc')
+          .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
           .where('uc.challenge_id', acceptedChallenge.challenge_id)
+          .where('u.is_banned', false)
+          .select('uc.*')
           .then(userChallenges => {
             return {
               ...acceptedChallenge,
@@ -482,6 +498,7 @@ function findUserCompletedChallenges(userId, sortOption) {
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
     .where('uc.user_id', userId)
     .where('completed', true)
+    .where('u.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name',
@@ -512,7 +529,10 @@ function findUserCompletedChallenges(userId, sortOption) {
       // Loop through completed challenges, finding active users
       return Promise.all(completedChallenges.map(completedChallenge => {
         return db('userChallenges as uc')
+          .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
           .where('uc.challenge_id', completedChallenge.challenge_id)
+          .where('u.is_banned', false)
+          .select('uc.*')
           .then(userChallenges => {
             return {
               ...completedChallenge,
@@ -544,6 +564,7 @@ function findAllChallengeHighScores(challengeId) {
     .where('uc.challenge_id', challengeId)
     .where('c.is_high_score', true)
     .whereNot('uc.high_score', null)
+    .where('u.is_banned', false)
     .select([
       'uc.*',
       'u.username'
@@ -556,6 +577,7 @@ function findAllChallengeHighScores(challengeId) {
         .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
         .where('uc.challenge_id', challengeId)
         .where('uc.high_score', null)
+        .where('u.is_banned', false)
         .select([
           'uc.*',
           'u.username'
@@ -585,6 +607,7 @@ function findAllChallengeSpeedruns(challengeId) {
     .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
     .where('uc.challenge_id', challengeId)
     .where('c.is_speedrun', true)
+    .where('u.is_banned', false)
     .whereNot('uc.total_milliseconds', null)
     .select([
       'uc.*',
@@ -598,6 +621,7 @@ function findAllChallengeSpeedruns(challengeId) {
         .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
         .where('uc.challenge_id', challengeId)
         .where('uc.total_milliseconds', null)
+        .where('u.is_banned', false)
         .select([
           'uc.*',
           'u.username'
@@ -629,6 +653,7 @@ function findAllChallengeForGlorys(challengeId) {
     .where('c.is_speedrun', false)
     .where('c.is_high_score', false)
     .where('uc.completed', true)
+    .where('u.is_banned', false)
     .select([
       'uc.*',
       'u.username'
@@ -643,6 +668,7 @@ function findAllChallengeForGlorys(challengeId) {
         .where('c.is_speedrun', false)
         .where('c.is_high_score', false)
         .where('uc.completed', false)
+        .where('u.is_banned', false)
         .select([
           'uc.*',
           'u.username'
@@ -806,11 +832,13 @@ function findIfChallengeAlreadyAccepted(userId, challengeId) {
 function findUserCompletedChallengeTotal(userId) {
   return db('userChallenges as uc')
     .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+    .leftOuterJoin('users as u', 'c.user_id', 'u.id')
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
     .where('uc.user_id', userId)
     .where('uc.completed', true)
     .where('g.public', true)
+    .where('u.is_banned', false)
     .select([
       'g.name',
       'd.points'

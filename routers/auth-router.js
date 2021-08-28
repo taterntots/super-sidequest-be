@@ -56,15 +56,18 @@ router.post('/login', (req, res) => {
     .first()
     .then(user => {
       // If the user exists, passwords match, and has verified their email, log 'em in!
-      if (user && bcrypt.compareSync(password, user.password) && user.is_verified) {
+      if (user && bcrypt.compareSync(password, user.password) && user.is_verified && !user.is_banned) {
         setTimeout(function () { // Give it some loading time
           const token = signToken(user);
           const { id, username, email } = user;
           res.status(200).json({ id, username, email, token });
         }, 2000)
         // Otherwise, if the user exists, passwords match, and has NOT verified their email, 
-      } else if (user && bcrypt.compareSync(password, user.password) && !user.is_verified) {
+      } else if (user && bcrypt.compareSync(password, user.password) && !user.is_verified && !user.is_banned) {
         res.status(401).json({ message: 'Please verify your account' });
+        // Otherwise, if a user is banned, don't log them in
+      } else if (user && bcrypt.compareSync(password, user.password) && user.is_banned) {
+        res.status(401).json({ message: `User account is banned. You must have been a real jerk to be seeing this.` });
         // Otherwise, email and password don't match, or the user does not exist
       } else {
         res.status(401).json({ message: 'Email address does not exist or password does not match' });

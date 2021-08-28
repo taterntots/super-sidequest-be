@@ -17,6 +17,20 @@ router.get('/', restrictedAdmin, (req, res) => {
     });
 });
 
+//*************** GET ALL BANNED USERS WITH TOTAL EXPERIENCE POINTS *****************//
+router.get('/all/banned', restrictedAdmin, (req, res) => {
+  Users.findBannedUsers()
+    .then(users => {
+      res.json(users);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: 'There was an error getting all banned users to display'
+      });
+    });
+});
+
 //*************** GET ALL UNVERIFIED USERS *****************//
 router.get('/all/unverified', restrictedAdmin, (req, res) => {
   Users.findUnverifiedUsers()
@@ -248,10 +262,12 @@ router.delete('/:userId', validateUserId, restrictedAdmin, (req, res) => {
 
   Users.removeUserById(userId)
     .then(response => {
-      res.status(200).json({
-        success: `The user was successfully deleted`,
-        id: userId
-      });
+      setTimeout(function () { // Give it some loading time
+        res.status(200).json({
+          success: `The user was successfully deleted`,
+          id: userId
+        });
+      }, 2000)
     })
     .catch(err => {
       console.log(err);
@@ -365,6 +381,22 @@ router.get('/:userId/games/:gameId/exp', validateUserId, restrictedAdmin, (req, 
     });
 });
 
+//*************** FIND OUT IF A USER IS BANNED *****************//
+router.get('/username/:username/banned', validateUsername, restrictedAdmin, (req, res) => {
+  let { username } = req.params;
+
+  Users.findIfUserBannedByUsername(username)
+    .then(response => {
+      res.status(200).json(response);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: `There was an error finding out whether this user is banned or not`
+      });
+    });
+});
+
 //*************** FIND ALL PLEDGED PATRONS ON PATREON *****************//
 
 router.get('/patreon/emails', (req, res) => {
@@ -375,6 +407,22 @@ router.get('/patreon/emails', (req, res) => {
     .catch(err => {
       res.status(500).json({
         errorMessage: 'There was an error getting a list of Patreon emails'
+      });
+    })
+});
+
+//*************** CHECK IF A USERNAME ALREADY EXISTS *****************//
+
+router.get('/username/:username/exists', (req, res) => {
+  let { username } = req.params;
+
+  Users.findIfUserNameExists(username)
+    .then(response => {
+      res.status(200).json(response);
+    })
+    .catch(err => {
+      res.status(500).json({
+        errorMessage: 'There was an error finding if the username already exists'
       });
     })
 });

@@ -10,7 +10,9 @@ function findPublicGames() {
       // Find total number of challenges for each game
       return Promise.all(publicGames.map(publicGame => {
         return db('challenges as c')
+          .leftOuterJoin('users as u', 'c.user_id', 'u.id')
           .where('c.game_id', publicGame.id)
+          .where('u.is_banned', false)
           .then(challenges => {
             return {
               ...publicGame,
@@ -30,7 +32,9 @@ function findPrivateGames() {
       // Find total number of challenges for each game
       return Promise.all(privateGames.map(privateGame => {
         return db('challenges as c')
+          .leftOuterJoin('users as u', 'c.user_id', 'u.id')
           .where('c.game_id', privateGame.id)
+          .where('u.is_banned', false)
           .then(challenges => {
             return {
               ...privateGame,
@@ -48,7 +52,9 @@ function findUserAcceptedGames(userId) {
 
   return db('userChallenges as uc')
     .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+    .leftOuterJoin('users as u', 'c.user_id', 'u.id')
     .where('uc.user_id', userId)
+    .where('u.is_banned', false)
     .select([
       'uc.*',
       'c.game_id'
@@ -101,6 +107,7 @@ function findGameChallenges(gameId, userId) {
     .leftOuterJoin('systems as s', 'c.system_id', 's.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
     .where('c.game_id', gameId)
+    .where('u.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name',
@@ -127,7 +134,10 @@ function findGameChallenges(gameId, userId) {
       // Map through the gameChallenges and find number of users who accepted each one
       return Promise.all(gameChallenges.map(gameChallenge => {
         return db('userChallenges as uc')
+          .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
           .where('uc.challenge_id', gameChallenge.challenge_id)
+          .where('u.is_banned', false)
+          .select('uc.*')
           .then(challenges => {
             // Map through the current users challenges to see which ones they completed, only if user is signed in
             if (userId !== 'no-user') {
@@ -172,6 +182,7 @@ function findGameChallengesByPopularity(gameId, userId) {
     .leftOuterJoin('systems as s', 'c.system_id', 's.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
     .where('c.game_id', gameId)
+    .where('u.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name',
@@ -197,7 +208,10 @@ function findGameChallengesByPopularity(gameId, userId) {
       // Map through the gameChallenges and find number of users who accepted each one
       return Promise.all(gameChallenges.map(gameChallenge => {
         return db('userChallenges as uc')
+          .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
           .where('uc.challenge_id', gameChallenge.challenge_id)
+          .where('u.is_banned', false)
+          .select('uc.*')
           .then(challenges => {
             // Map through the current users challenges to see which ones they completed, only if user is signed in
             if (userId !== 'no-user') {
@@ -247,6 +261,7 @@ function findGameChallengesByExpiration(gameId, userId) {
     .leftOuterJoin('systems as s', 'c.system_id', 's.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
     .where('c.game_id', gameId)
+    .where('u.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name',
@@ -273,7 +288,10 @@ function findGameChallengesByExpiration(gameId, userId) {
       // Map through the gameChallenges and find number of users who accepted each one
       return Promise.all(gameChallenges.map(gameChallenge => {
         return db('userChallenges as uc')
+          .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
           .where('uc.challenge_id', gameChallenge.challenge_id)
+          .where('u.is_banned', false)
+          .select('uc.*')
           .then(challenges => {
             // Map through the current users challenges to see which ones they completed, only if user is signed in
             if (userId !== 'no-user') {

@@ -7,6 +7,32 @@ const { patreon } = require('patreon');
 function findUsers() {
   return db('users')
     .where('is_verified', true)
+    .where('is_banned', false)
+    .orderBy('username', 'asc')
+    .then(users => {
+      // Map through users, finding total experience points and total number of created challenges for each user
+      return Promise.all(users.map(user => {
+        return findUserEXPForAllGames(user.id).then(userEXP => {
+          return db('challenges as c')
+            .leftOuterJoin('games as g', 'c.game_id', 'g.id')
+            .where('c.user_id', user.id)
+            .where('g.public', true)
+            .then(userCreatedChallenges => {
+              return {
+                ...user,
+                total_experience_points: userEXP,
+                total_created_challenges: userCreatedChallenges.length
+              }
+            })
+        })
+      }))
+    })
+}
+
+//FIND ALL BANNED USERS WITH TOTAL EXPERIENCE POINTS
+function findBannedUsers() {
+  return db('users')
+    .where('is_banned', true)
     .orderBy('username', 'asc')
     .then(users => {
       // Map through users, finding total experience points and total number of created challenges for each user
@@ -38,7 +64,8 @@ function findUnverifiedUsers() {
 //FIND ALL USERS WITH SPECIFIC GAME TOTAL EXPERIENCE POINTS
 function findUsersWithTotalGameEXP(gameId) {
   return db('users as u')
-    .where('is_verified', true)
+    .where('u.is_verified', true)
+    .where('u.is_banned', false)
     .orderBy('username', 'asc')
     .then(users => {
       // Map through users, finding total experience points and total number of created challenges for each user for a specific game
@@ -91,7 +118,8 @@ function findAllUserFollowings(userId) {
   return db('userFollowers as uf')
     .leftOuterJoin('users as u', 'uf.follower_id', 'u.id')
     .where('uf.user_id', userId)
-    .where('is_verified', true)
+    .where('u.is_verified', true)
+    .where('u.is_banned', false)
     .select('u.*')
     .orderBy('u.username', 'asc')
     .then(userFollowings => {
@@ -119,7 +147,8 @@ function findAllUserFollowers(userId) {
   return db('userFollowers as uf')
     .leftOuterJoin('users as u', 'uf.user_id', 'u.id')
     .where('uf.follower_id', userId)
-    .where('is_verified', true)
+    .where('u.is_verified', true)
+    .where('u.is_banned', false)
     .select('u.*')
     .orderBy('u.username', 'asc')
     .then(userFollowers => {
@@ -339,11 +368,13 @@ function findUserEXPForAllGames(userId) {
   return db('userChallenges as uc')
     .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
     .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+    .leftOuterJoin('users as challenge_holder', 'c.user_id', 'challenge_holder.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
     .where('uc.user_id', userId)
     .where('uc.completed', true)
     .where('g.public', true)
+    .where('challenge_holder.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name as challenge_name',
@@ -364,12 +395,14 @@ function findUserEXPForGameById(userId, gameId) {
   return db('userChallenges as uc')
     .leftOuterJoin('users as u', 'uc.user_id', 'u.id')
     .leftOuterJoin('challenges as c', 'uc.challenge_id', 'c.id')
+    .leftOuterJoin('users as challenge_holder', 'c.user_id', 'challenge_holder.id')
     .leftOuterJoin('difficulty as d', 'c.difficulty_id', 'd.id')
     .leftOuterJoin('games as g', 'c.game_id', 'g.id')
     .where('uc.user_id', userId)
     .where('uc.completed', true)
     .where('c.game_id', gameId)
     .where('g.public', true)
+    .where('challenge_holder.is_banned', false)
     .select([
       'c.id as challenge_id',
       'c.name as challenge_name',
@@ -382,6 +415,20 @@ function findUserEXPForGameById(userId, gameId) {
         totalExperiencePoints += completedChallenge.points
       })
       return totalExperiencePoints
+    })
+}
+
+//FIND IF A USER IS BANNED
+function findIfUserBannedByUsername(username) {
+  return db('users as u')
+    .where('u.username', username)
+    .first()
+    .then(user => {
+      if (user.is_banned) {
+        return true
+      } else {
+        return false
+      }
     })
 }
 
@@ -455,6 +502,7 @@ schedule.scheduleJob(rule2, function () {
 
 module.exports = {
   findUsers,
+  findBannedUsers,
   findUnverifiedUsers,
   findUsersWithTotalGameEXP,
   findUserById,
@@ -476,5 +524,6 @@ module.exports = {
   findIfUserNameExists,
   findUserEXPForAllGames,
   findUserEXPForGameById,
+  findIfUserBannedByUsername,
   getPatreonEmails
 };
